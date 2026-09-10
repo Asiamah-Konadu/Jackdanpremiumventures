@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #080c14;
+    color: #f1f5f9;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Luxury Gold & Metallic Gradients */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #fce08f 0%, #d4af37 40%, #aa7c11 75%, #fbe8a6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.silver-gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 45%, #94a3b8 80%, #f8fafc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-btn {
+  background: linear-gradient(135deg, #d4af37 0%, #f3c74d 50%, #b8860b 100%);
+  color: #0b0f17;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px -2px rgba(212, 175, 55, 0.35);
+}
+
+.gold-gradient-btn:hover {
+  background: linear-gradient(135deg, #f3c74d 0%, #ffd966 50%, #d4af37 100%);
+  box-shadow: 0 6px 28px 0 rgba(212, 175, 55, 0.55);
+  transform: translateY(-2px);
+}
+
+.gold-border-card {
+  background: linear-gradient(180deg, rgba(26, 34, 52, 0.85) 0%, rgba(13, 18, 30, 0.95) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  backdrop-filter: blur(12px);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gold-border-card:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 12px 36px -8px rgba(212, 175, 55, 0.15), 0 0 20px 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+}
+
+.glass-panel {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom animated background elements */
+.radial-gold-glow {
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0) 70%);
+}
+
+.radial-blue-glow {
+  background: radial-gradient(circle, rgba(30, 58, 138, 0.25) 0%, rgba(15, 23, 42, 0) 70%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #080c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #232f48;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
