@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, MessageCircle, Menu, X, Shield, Globe, Car, Wrench, Calculator, Search, Compass, ChevronDown } from 'lucide-react';
+import { 
+  Phone, 
+  MessageCircle, 
+  Menu, 
+  X, 
+  Shield, 
+  Globe, 
+  Car, 
+  Wrench, 
+  Calculator, 
+  Search, 
+  Compass, 
+  ChevronDown,
+  Home
+} from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES } from '../data/inventory';
 
 interface NavbarProps {
@@ -28,12 +42,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const navLinks = [
+    { name: 'Home', id: 'home', icon: Home },
     { name: 'Vehicles', id: 'inventory', icon: Car },
     { name: 'Spare Parts', id: 'parts', icon: Wrench },
-    { name: 'Cost Calculator', id: 'calculator', icon: Calculator },
+    { name: 'Duty Estimator', id: 'calculator', icon: Calculator },
     { name: 'Track Cargo', id: 'tracker', icon: Search },
-    { name: 'Logistics & Travel', id: 'sister-ventures', icon: Compass },
-    { name: 'About', id: 'about', icon: Shield },
+    { name: 'Sister Ventures', id: 'ventures', icon: Compass },
     { name: 'Contact', id: 'contact', icon: Phone },
   ];
 
@@ -46,14 +60,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-[#080c14]/95 backdrop-blur-md shadow-2xl border-b border-amber-500/20 py-2.5' : 'bg-gradient-to-b from-[#080c14]/90 via-[#080c14]/60 to-transparent py-4'
+      isScrolled ? 'bg-[#080c14]/95 backdrop-blur-md shadow-2xl border-b border-amber-500/20 py-2.5' : 'bg-gradient-to-b from-[#080c14]/95 via-[#080c14]/80 to-transparent py-4'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
           {/* Brand Logo */}
           <div 
-            onClick={() => handleNavClick('hero')}
+            onClick={() => handleNavClick('home')}
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-slate-800 to-amber-600/10 border border-amber-500/40 group-hover:border-amber-400 transition-all shadow-lg shadow-amber-500/10">
@@ -62,7 +76,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 alt="Jackdan Premium Ventures Logo" 
                 className="w-9 h-9 object-contain drop-shadow"
                 onError={(e) => {
-                  // fallback to title
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
@@ -83,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800/80 backdrop-blur-sm">
+          <nav className="hidden xl:flex items-center gap-1 bg-slate-900/70 p-1.5 rounded-full border border-slate-800/80 backdrop-blur-sm">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = activeSection === link.id;
@@ -93,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => handleNavClick(link.id)}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/25'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/25 font-bold'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                   }`}
                 >
@@ -149,46 +162,36 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="xl:hidden">Call</span>
             </a>
 
-            {/* WhatsApp Quick Chat */}
+            {/* WhatsApp CTA */}
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="gold-gradient-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
+              className="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
             >
-              <MessageCircle className="w-4 h-4 fill-slate-950" />
-              <span>WhatsApp Us</span>
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Inquire</span>
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 lg:hidden">
-            {/* Currency for mobile */}
+          {/* Mobile Menu Button & Currency Switcher */}
+          <div className="flex items-center gap-2 xl:hidden">
+            {/* Currency for Mobile */}
             <button
               onClick={() => {
                 const codes = Object.keys(EXCHANGE_RATES);
-                const nextIdx = (codes.indexOf(currentCurrency) + 1) % codes.length;
-                onCurrencyChange(codes[nextIdx]);
+                const nextIndex = (codes.indexOf(currentCurrency) + 1) % codes.length;
+                onCurrencyChange(codes[nextIndex]);
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-semibold text-amber-400"
+              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-amber-400 flex items-center gap-1"
+              title="Click to switch currency"
             >
-              {currentCurrency}
+              <span>{currentCurrency}</span>
             </button>
-
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg bg-emerald-600/20 text-emerald-400 border border-emerald-500/30"
-              aria-label="WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4" />
-            </a>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-slate-800 text-slate-200 hover:text-white border border-slate-700"
-              aria-label="Toggle Menu"
+              className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300 hover:text-white"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -197,10 +200,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#0a0e1a] border-b border-amber-500/20 px-4 pt-3 pb-6 space-y-2 animate-fadeIn">
-          <div className="grid grid-cols-2 gap-2 py-2">
+        <div className="xl:hidden bg-slate-950/98 border-b border-amber-500/20 px-4 pt-4 pb-6 space-y-3 mt-2 backdrop-blur-xl animate-fadeIn">
+          <nav className="grid grid-cols-1 gap-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = activeSection === link.id;
@@ -208,35 +211,36 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={link.id}
                   onClick={() => handleNavClick(link.id)}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-amber-500 text-slate-950 font-bold'
-                      : 'bg-slate-900/80 text-slate-300 border border-slate-800'
+                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/40 text-amber-300'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-amber-400'}`} />
+                  <Icon className="w-4 h-4 text-amber-400" />
                   <span>{link.name}</span>
                 </button>
               );
             })}
-          </div>
+          </nav>
 
           <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
             <a
               href={`tel:${CONTACT_INFO.primaryPhoneFormatted}`}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-800 text-white text-xs font-semibold"
             >
               <Phone className="w-4 h-4 text-amber-400" />
               <span>Call: {CONTACT_INFO.phones[0]}</span>
             </a>
+
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="gold-gradient-btn flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold"
+              className="gold-gradient-btn flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold shadow-lg"
             >
-              <MessageCircle className="w-4 h-4 fill-slate-950" />
-              <span>Chat with Auto Specialist</span>
+              <MessageCircle className="w-4 h-4" />
+              <span>Chat with Jackdan on WhatsApp</span>
             </a>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
+import { InformationalHome } from './components/InformationalHome';
 import { VehicleInventory } from './components/VehicleInventory';
 import { SparePartsCatalog } from './components/SparePartsCatalog';
 import { ImportCalculator } from './components/ImportCalculator';
@@ -9,115 +9,180 @@ import { SisterVentures } from './components/SisterVentures';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { CONTACT_INFO } from './data/inventory';
-import { MessageSquare, PhoneCall } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Car, Wrench, Calculator, Compass, Search, Phone } from 'lucide-react';
 
 export function App() {
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
-  const [activeSection, setActiveSection] = useState<string>('hero');
-  const [inventorySearch, setInventorySearch] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<string>('home');
   const [trackerId, setTrackerId] = useState<string>('JKD-7829-GH');
 
-  // Scroll spy to highlight active section in Navbar
+  // Scroll to top whenever user changes page
   useEffect(() => {
-    const sectionIds = ['inventory', 'parts', 'calculator', 'tracker', 'sister-ventures', 'contact'];
-    
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
-      for (const id of sectionIds) {
-        const element = document.getElementById(id);
-        if (element) {
-          const top = element.offsetTop;
-          const height = element.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(id);
-            return;
-          }
-        }
-      }
-      if (window.scrollY < 300) {
-        setActiveSection('hero');
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleNavigate = (sectionId: string) => {
-    setActiveSection(sectionId);
-    if (sectionId === 'hero' || sectionId === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleNavigate = (pageId: string) => {
+    // Map section IDs to page names
+    if (pageId === 'hero' || pageId === 'home' || pageId === 'about') {
+      setCurrentPage('home');
+    } else if (pageId === 'sister-ventures' || pageId === 'ventures') {
+      setCurrentPage('ventures');
+    } else {
+      setCurrentPage(pageId);
     }
   };
 
-  const handleHeroSearch = (query: string) => {
-    setInventorySearch(query);
-    handleNavigate('inventory');
+  const getPageBanner = () => {
+    switch (currentPage) {
+      case 'inventory':
+        return {
+          title: 'Available Vehicle Inventory',
+          subtitle: 'Explore certified luxury SUVs, sedans, and commercial trucks ready for shipment or inspection in Ghana.',
+          icon: Car,
+        };
+      case 'parts':
+        return {
+          title: 'Genuine OEM Spare Parts Catalog',
+          subtitle: 'Wholesale and retail certified automotive spare parts with factory warranty and fast delivery across Ghana.',
+          icon: Wrench,
+        };
+      case 'calculator':
+        return {
+          title: 'Ghana Auto Import & Duty Estimator',
+          subtitle: 'Calculate estimated ocean freight, terminal handling, and ICUMS customs duties from global ports directly to Tema.',
+          icon: Calculator,
+        };
+      case 'tracker':
+        return {
+          title: 'Live Vessel & Container Tracker',
+          subtitle: 'Monitor your vehicle or cargo container through all 5 international shipping and customs clearing milestones.',
+          icon: Search,
+        };
+      case 'ventures':
+        return {
+          title: 'Jackdan Sister Ventures & Logistics',
+          subtitle: 'Commercial freight forwarding with Twumaasco Logistics & Trading, and global travel advisory with Jackdan Travel & Tour.',
+          icon: Compass,
+        };
+      case 'contact':
+        return {
+          title: 'Contact Jackdan Premium Ventures',
+          subtitle: 'Speak directly with our automotive import brokers, parts procurement desk, or customs clearing team.',
+          icon: Phone,
+        };
+      default:
+        return null;
+    }
   };
 
-  const handleHeroTrack = (id: string) => {
-    setTrackerId(id);
-    handleNavigate('tracker');
-  };
+  const banner = getPageBanner();
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative">
-      {/* Navigation */}
+    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between">
+      {/* Navigation Header */}
       <Navbar
         currentCurrency={currentCurrency}
         onCurrencyChange={setCurrentCurrency}
-        activeSection={activeSection}
+        activeSection={currentPage}
         onNavigate={handleNavigate}
       />
 
-      {/* Main Content Sections */}
-      <main>
-        {/* 1. Hero Section */}
-        <Hero
-          onNavigate={handleNavigate}
-          onSearch={handleHeroSearch}
-          onTrackSample={handleHeroTrack}
-        />
+      {/* Main Content Area */}
+      <main className="flex-1">
+        {currentPage === 'home' ? (
+          /* Informational Front Website */
+          <InformationalHome
+            onNavigatePage={handleNavigate}
+            currentCurrency={currentCurrency}
+          />
+        ) : (
+          /* Sub-Page Layout with Breadcrumbs */
+          <div className="pt-28 pb-20">
+            {/* Top Breadcrumb & Page Banner */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+              <div className="p-6 sm:p-8 rounded-3xl bg-dark-900 border border-dark-800 shadow-xl relative overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('home')}
+                      className="inline-flex items-center gap-1.5 text-xs text-gold-400 hover:text-white mb-2 transition-colors font-semibold"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back to Home Overview</span>
+                    </button>
+                    <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
+                      {banner?.icon && <banner.icon className="w-7 h-7 text-gold-400" />}
+                      <span>{banner?.title}</span>
+                    </h1>
+                    <p className="text-xs sm:text-sm text-dark-300 max-w-2xl">
+                      {banner?.subtitle}
+                    </p>
+                  </div>
 
-        {/* 2. Vehicle Inventory */}
-        <VehicleInventory
-          currentCurrency={currentCurrency}
-          initialSearch={inventorySearch}
-        />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('home')}
+                      className="px-4 py-2 rounded-xl bg-dark-800 hover:bg-dark-700 border border-dark-700 text-xs font-semibold text-white transition-colors"
+                    >
+                      Return Home
+                    </button>
+                    <a
+                      href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan, I am inquiring from the ${banner?.title} page.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Ask an Officer</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {/* 3. Genuine Spare Parts Catalog */}
-        <SparePartsCatalog
-          currentCurrency={currentCurrency}
-        />
+            {/* Dedicated Page View */}
+            {currentPage === 'inventory' && (
+              <VehicleInventory
+                currentCurrency={currentCurrency}
+              />
+            )}
 
-        {/* 4. Import & Customs Duty Calculator */}
-        <ImportCalculator
-          currentCurrency={currentCurrency}
-        />
+            {currentPage === 'parts' && (
+              <SparePartsCatalog
+                currentCurrency={currentCurrency}
+              />
+            )}
 
-        {/* 5. Live Shipment & Container Tracker */}
-        <ShipmentTracker
-          key={trackerId}
-          initialTrackingId={trackerId}
-        />
+            {currentPage === 'calculator' && (
+              <ImportCalculator
+                currentCurrency={currentCurrency}
+              />
+            )}
 
-        {/* 6. Sister Ventures (Twumaasco Logistics & Jackdan Travel) */}
-        <SisterVentures />
+            {currentPage === 'tracker' && (
+              <ShipmentTracker
+                key={trackerId}
+                initialTrackingId={trackerId}
+              />
+            )}
 
-        {/* 7. Contact & Direct Concierge */}
-        <ContactSection />
+            {currentPage === 'ventures' && (
+              <SisterVentures />
+            )}
+
+            {currentPage === 'contact' && (
+              <ContactSection />
+            )}
+          </div>
+        )}
       </main>
 
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
 
-      {/* Floating Instant WhatsApp & Call Button */}
+      {/* Floating Instant WhatsApp Button */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-auto">
         <a
           href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`}
