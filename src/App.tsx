@@ -6,10 +6,12 @@ import { SparePartsCatalog } from './components/SparePartsCatalog';
 import { ImportCalculator } from './components/ImportCalculator';
 import { ShipmentTracker } from './components/ShipmentTracker';
 import { SisterVentures } from './components/SisterVentures';
+import { TwumaascoLogistics } from './components/TwumaascoLogistics';
+import { JackdanTravelTour } from './components/JackdanTravelTour';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { CONTACT_INFO } from './data/inventory';
-import { MessageSquare, ArrowLeft, Car, Wrench, Calculator, Compass, Search, Phone } from 'lucide-react';
+import { MessageSquare, ArrowLeft, Car, Wrench, Calculator, Compass, Search, Phone, Ship, Plane, Building2 } from 'lucide-react';
 
 export function App() {
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
@@ -22,7 +24,6 @@ export function App() {
   }, [currentPage]);
 
   const handleNavigate = (pageId: string) => {
-    // Map section IDs to page names
     if (pageId === 'hero' || pageId === 'home' || pageId === 'about') {
       setCurrentPage('home');
     } else if (pageId === 'sister-ventures' || pageId === 'ventures') {
@@ -37,7 +38,7 @@ export function App() {
       case 'inventory':
         return {
           title: 'Available Vehicle Inventory',
-          subtitle: 'Explore certified luxury SUVs, sedans, and commercial trucks ready for shipment or inspection in Ghana.',
+          subtitle: 'Certified luxury SUVs, sedans, and commercial trucks ready for shipment or inspection in Ghana.',
           icon: Car,
         };
       case 'parts':
@@ -49,7 +50,7 @@ export function App() {
       case 'calculator':
         return {
           title: 'Ghana Auto Import & Duty Estimator',
-          subtitle: 'Calculate estimated ocean freight, terminal handling, and ICUMS customs duties from global ports directly to Tema.',
+          subtitle: 'Calculate estimated ocean freight, terminal handling, and ICUMS customs duties from global ports to Tema.',
           icon: Calculator,
         };
       case 'tracker':
@@ -60,9 +61,21 @@ export function App() {
         };
       case 'ventures':
         return {
-          title: 'Jackdan Sister Ventures & Logistics',
+          title: 'Jackdan Sister Ventures Ecosystem',
           subtitle: 'Commercial freight forwarding with Twumaasco Logistics & Trading, and global travel advisory with Jackdan Travel & Tour.',
-          icon: Compass,
+          icon: Building2,
+        };
+      case 'twumaasco-logistics':
+        return {
+          title: 'Twumaasco Logistics & Trading',
+          subtitle: '"Your Trusted Logistics Partner" — Sea Freight, Air Cargo, Bonded Storage & West Africa Road Haulage.',
+          icon: Ship,
+        };
+      case 'travel-tour':
+        return {
+          title: 'Jackdan Travel & Tour',
+          subtitle: '"Your Journey, Our Priority" — Visa Advisory, Global Flights, Hotels & Curated Safari Tours.',
+          icon: Plane,
         };
       case 'contact':
         return {
@@ -169,7 +182,15 @@ export function App() {
             )}
 
             {currentPage === 'ventures' && (
-              <SisterVentures />
+              <SisterVentures onNavigate={handleNavigate} />
+            )}
+
+            {currentPage === 'twumaasco-logistics' && (
+              <TwumaascoLogistics />
+            )}
+
+            {currentPage === 'travel-tour' && (
+              <JackdanTravelTour />
             )}
 
             {currentPage === 'contact' && (

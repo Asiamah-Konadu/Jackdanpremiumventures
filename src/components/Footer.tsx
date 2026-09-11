@@ -124,29 +124,28 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   className="hover:text-gold-400 transition-colors flex items-center gap-1.5 text-left"
                 >
                   <ChevronRight className="w-3.5 h-3.5 text-dark-500" />
+                  <span>Group Ecosystem</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('twumaasco-logistics')}
+                  className="hover:text-blue-400 transition-colors flex items-center gap-1.5 text-left"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-dark-500" />
                   <span>Twumaasco Logistics</span>
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('ventures')}
-                  className="hover:text-gold-400 transition-colors flex items-center gap-1.5 text-left"
+                  onClick={() => onNavigate('travel-tour')}
+                  className="hover:text-emerald-400 transition-colors flex items-center gap-1.5 text-left"
                 >
                   <ChevronRight className="w-3.5 h-3.5 text-dark-500" />
                   <span>Jackdan Travel & Tour</span>
                 </button>
-              </li>
-              <li>
-                <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gold-400 transition-colors flex items-center gap-1.5"
-                >
-                  <ChevronRight className="w-3.5 h-3.5 text-dark-500" />
-                  <span>Wholesale Distributorship</span>
-                </a>
               </li>
               <li>
                 <button
@@ -168,7 +167,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </h4>
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-gold-400 flex-shrink-0 mt-0.5" />
-              <span>{CONTACT_INFO.address}</span>
+              <div className="text-xs leading-relaxed">
+                <strong className="text-white block">{CONTACT_INFO.companyName}</strong>
+                <span>{CONTACT_INFO.poBox}</span>
+                <br />
+                <span>{CONTACT_INFO.landmark}</span>
+                <br />
+                <span>{CONTACT_INFO.area}, {CONTACT_INFO.city}, {CONTACT_INFO.country}</span>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="w-4 h-4 text-gold-400 flex-shrink-0" />

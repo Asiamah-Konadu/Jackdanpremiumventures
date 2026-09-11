@@ -8,8 +8,15 @@ import {
   MessageSquare, 
   CheckCircle2, 
   ShieldCheck, 
-  Sparkles,
-  PhoneCall
+  Sparkles, 
+  PhoneCall,
+  Copy,
+  Check,
+  ExternalLink,
+  Compass,
+  Building2,
+  Ship,
+  Plane
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
 
@@ -22,6 +29,13 @@ export const ContactSection: React.FC = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(CONTACT_INFO.fullAddressWithCompany);
+    setCopiedAddress(true);
+    setTimeout(() => setCopiedAddress(false), 2500);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +55,13 @@ New Website Inquiry:
   };
 
   return (
-    <section id="contact" className="py-24 bg-dark-950 relative overflow-hidden border-t border-dark-800">
+    <section id="contact" className="py-12 bg-dark-950 relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute top-1/3 left-1/3 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-4">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Direct Concierge Desk</span>
@@ -66,10 +80,58 @@ New Website Inquiry:
           <div className="lg:col-span-5 space-y-6">
             <div className="p-8 rounded-3xl bg-dark-900/90 border border-gold-500/30 backdrop-blur-xl shadow-2xl space-y-8">
               <div>
-                <h3 className="font-heading text-2xl font-bold text-white mb-2">Corporate Office</h3>
+                <h3 className="font-heading text-2xl font-bold text-white mb-2">Corporate Headquarters</h3>
                 <p className="text-dark-300 text-sm leading-relaxed">
-                  Headquartered at the gateway of Ghana's international maritime trade corridor, serving clients across the country and the diaspora.
+                  Located in the heart of Accra's automotive commercial district, serving clients across all 16 regions of Ghana and international buyers.
                 </p>
+              </div>
+
+              {/* Exact Physical Address Card */}
+              <div className="p-5 rounded-2xl bg-dark-950 border border-gold-500/30 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-gold-400 uppercase tracking-wider">
+                  <MapPin className="w-4 h-4 text-gold-400" />
+                  <span>Physical & Postal Address</span>
+                </div>
+                
+                <div className="text-white font-mono text-xs sm:text-sm leading-relaxed">
+                  <strong>{CONTACT_INFO.companyName}</strong>
+                  <br />
+                  {CONTACT_INFO.poBox}
+                  <br />
+                  {CONTACT_INFO.landmark}
+                  <br />
+                  {CONTACT_INFO.area}, {CONTACT_INFO.city}, {CONTACT_INFO.country}
+                </div>
+
+                <div className="pt-2 border-t border-dark-800 flex flex-wrap items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleCopyAddress}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-xs font-semibold transition-colors"
+                  >
+                    {copiedAddress ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <span className="text-green-400">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-gold-400" />
+                        <span>Copy Address</span>
+                      </>
+                    )}
+                  </button>
+
+                  <a
+                    href={CONTACT_INFO.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 text-xs font-semibold transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Google Maps</span>
+                  </a>
+                </div>
               </div>
 
               {/* Direct Touchpoints */}
@@ -133,19 +195,6 @@ New Website Inquiry:
                   </div>
                 </div>
 
-                {/* Location */}
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center flex-shrink-0 text-gold-400">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs uppercase tracking-wider text-dark-400 font-semibold block">Hub & Clearing Office</span>
-                    <span className="text-white text-sm">
-                      {CONTACT_INFO.address}
-                    </span>
-                  </div>
-                </div>
-
                 {/* Operating Hours */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center flex-shrink-0 text-gold-400">
@@ -164,15 +213,15 @@ New Website Inquiry:
               {/* Verified Trust Badges */}
               <div className="pt-6 border-t border-dark-700 space-y-2">
                 <div className="flex items-center gap-2 text-xs text-dark-300">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400" />
-                  <span>Licensed Port Clearing Agent (ICUMS Compliant)</span>
+                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
+                  <span>Licensed Port Clearing Broker (ICUMS Compliant)</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-dark-300">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400" />
+                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
                   <span>100% OEM Genuine Parts & Verified Clean Titles</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-dark-300">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400" />
+                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
                   <span>Worldwide Door-to-Door & RoRo Freight Coverage</span>
                 </div>
               </div>
@@ -184,7 +233,7 @@ New Website Inquiry:
             <div className="p-8 sm:p-10 rounded-3xl bg-dark-900/90 border border-dark-700/80 backdrop-blur-xl shadow-2xl">
               <h3 className="font-heading text-2xl font-bold text-white mb-2">Send an Instant Inquiry</h3>
               <p className="text-dark-300 text-sm mb-8">
-                Fill out the form below. It will connect immediately to our senior desk on WhatsApp for immediate quotation and paperwork.
+                Fill out the form below. It will format your request and connect immediately to our senior desk on WhatsApp.
               </p>
 
               {submitted && (
@@ -204,25 +253,25 @@ New Website Inquiry:
                       id="contact-fullname"
                       type="text"
                       required
+                      placeholder="e.g. Kwame Mensah"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="e.g. Kwabena Mensah"
-                      className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 text-white placeholder-dark-400 focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                      className="w-full px-4 py-3.5 rounded-xl bg-dark-950 border border-dark-700 text-white placeholder-dark-500 text-sm focus:border-gold-500 focus:outline-none transition-colors"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="contact-phone" className="block text-xs font-semibold uppercase tracking-wider text-dark-300 mb-2">
-                      WhatsApp / Phone Number *
+                      Phone Number (WhatsApp) *
                     </label>
                     <input
                       id="contact-phone"
                       type="tel"
                       required
+                      placeholder="e.g. 024 123 4567"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+233 XX XXX XXXX"
-                      className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 text-white placeholder-dark-400 focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                      className="w-full px-4 py-3.5 rounded-xl bg-dark-950 border border-dark-700 text-white placeholder-dark-500 text-sm focus:border-gold-500 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -235,60 +284,55 @@ New Website Inquiry:
                     <input
                       id="contact-email"
                       type="email"
+                      placeholder="e.g. kwame@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="youremail@example.com"
-                      className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 text-white placeholder-dark-400 focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                      className="w-full px-4 py-3.5 rounded-xl bg-dark-950 border border-dark-700 text-white placeholder-dark-500 text-sm focus:border-gold-500 focus:outline-none transition-colors"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="contact-service" className="block text-xs font-semibold uppercase tracking-wider text-dark-300 mb-2">
-                      Service Requested *
+                      Service of Interest *
                     </label>
                     <select
                       id="contact-service"
                       value={formData.service}
                       onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                      className="w-full px-4 py-3.5 rounded-xl bg-dark-950 border border-dark-700 text-white text-sm focus:border-gold-500 focus:outline-none transition-colors"
                     >
-                      <option value="auto_import">Automobile Custom Import / Sourcing</option>
-                      <option value="showroom_car">Purchase Vehicle in Inventory</option>
-                      <option value="spare_parts">OEM Spare Parts (Wholesale / Retail)</option>
-                      <option value="customs_clearing">Port of Tema Customs Clearing</option>
-                      <option value="twumaasco_freight">Twumaasco Logistics & Sea/Air Cargo</option>
+                      <option value="auto_import">Automobile Sourcing & Importation</option>
+                      <option value="spare_parts">OEM Genuine Spare Parts Order</option>
+                      <option value="duty_clearing">Customs Clearing (ICUMS/Tema)</option>
+                      <option value="twumaasco_logistics">Twumaasco Freight & Cargo Logistics</option>
                       <option value="jackdan_travel">Jackdan Travel & Tour (Visa/Flights)</option>
+                      <option value="general">Corporate Distributorship & Other</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label htmlFor="contact-message" className="block text-xs font-semibold uppercase tracking-wider text-dark-300 mb-2">
-                    Message / Vehicle Details / Inquiries *
+                    Message / Specification Details *
                   </label>
                   <textarea
                     id="contact-message"
                     required
                     rows={4}
+                    placeholder="Tell us vehicle specs (make/year), spare part numbers, freight container sizes, or travel requirements..."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Tell us what make, model, year, part number, or freight requirements you have..."
-                    className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-700 text-white placeholder-dark-400 focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                    className="w-full px-4 py-3.5 rounded-xl bg-dark-950 border border-dark-700 text-white placeholder-dark-500 text-sm focus:border-gold-500 focus:outline-none transition-colors resize-none"
                   />
                 </div>
 
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full gold-gradient-btn py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-2 text-sm sm:text-base shadow-xl"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send Message to Jackdan Desk via WhatsApp</span>
-                  </button>
-                  <p className="text-center text-[11px] text-dark-400 mt-2.5">
-                    We respond within 15 minutes during standard operational hours.
-                  </p>
-                </div>
+                <button
+                  type="submit"
+                  className="w-full gold-gradient-btn py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xl hover:shadow-gold-500/20"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Send Message & Chat on WhatsApp</span>
+                </button>
               </form>
             </div>
           </div>
@@ -297,3 +341,5 @@ New Website Inquiry:
     </section>
   );
 };
+
+export default ContactSection;

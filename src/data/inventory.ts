@@ -346,10 +346,19 @@ export const EXCHANGE_RATES: Record<string, { symbol: string; rateFromUSD: numbe
 };
 
 export const CONTACT_INFO = {
+  companyName: 'Jackdan Premium Ventures',
+  poBox: 'P.O.BOX DK 1147',
+  landmark: 'OPPOSITE LIGHTHOUSE CHAPEL INTERNATIONAL, NEAR FANMILK',
+  area: 'ABOSSEY OKAI',
+  city: 'ACCRA',
+  country: 'GHANA',
+  address: 'P.O.BOX DK 1147, OPPOSITE LIGHTHOUSE CHAPEL INTERNATIONAL, ABOSSEY OKAI, NEAR FANMILK, ACCRA, GHANA',
+  fullAddressWithCompany: 'Jackdan Premium Ventures, P.O.BOX DK 1147, OPPOSITE LIGHTHOUSE CHAPEL INTERNATIONAL, ABOSSEY OKAI, NEAR FANMILK, ACCRA, GHANA',
+  googleMapsUrl: 'https://maps.google.com/?q=Lighthouse+Chapel+International+Abossey+Okai+Accra+Ghana',
   phones: ['+233 594 072 371', '+233 597 840 126'],
   primaryPhoneFormatted: '+233594072371',
   secondaryPhoneFormatted: '+233597840126',
   email: 'jackdanpremiumv@gmail.com',
-  address: 'Accra / Tema Logistics Corridor, Greater Accra, Ghana',
   whatsappMessage: 'Hello Jackdan Premium Ventures, I would like to inquire about importing a vehicle / purchasing genuine spare parts.'
 };
+
