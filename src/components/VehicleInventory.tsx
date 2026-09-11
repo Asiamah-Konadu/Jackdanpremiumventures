@@ -22,8 +22,8 @@ export const VehicleInventory: React.FC<VehicleInventoryProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
-  const categories = ['All', 'Luxury', 'SUV', 'Sedan', 'Truck'];
-  const makes = ['All', 'Mercedes-Benz', 'Toyota', 'Land Rover', 'Lexus', 'Honda', 'Hyundai'];
+  const categories = ['All', 'Sedan', 'SUV', 'Truck'];
+  const makes = ['All', 'Toyota', 'Hyundai', 'Honda'];
 
   const currencyInfo = EXCHANGE_RATES[currentCurrency] || EXCHANGE_RATES.USD;
 

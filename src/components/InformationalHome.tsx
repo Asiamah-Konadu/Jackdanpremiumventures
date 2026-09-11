@@ -488,10 +488,10 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
               <span>Certified Stock & Sourcing</span>
             </div>
             <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Featured Luxury & SUV <span className="gold-gradient-text">Showcase</span>
+              Popular & Practical <span className="gold-gradient-text">Vehicle Showcase</span>
             </h2>
             <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-xl">
-              Foreign-used, brand-new, and certified pre-owned vehicles verified for clean title and ready for direct shipment to Ghana.
+              High fuel economy sedans, reliable family crossovers, and heavy-duty 4x4 pickups — the most demanded and practical models in Ghana.
             </p>
           </div>
 
