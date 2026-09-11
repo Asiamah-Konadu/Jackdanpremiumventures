@@ -85,6 +85,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '2.8L D-4D Turbo Diesel (201 hp)',
     color: 'Pearl White Crystal Shine',
     vinPreview: 'JTEBU3FJ9PK******',
+    image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?auto=format&fit=crop&w=1000&q=80',
     features: ['7-Seater Leather', 'Cooler Box', 'Multi-Terrain Select', 'Rear Climate Control', 'Push-to-Start'],
     popular: true
   },
@@ -104,6 +105,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '3.5L V6 24V DOHC (301 hp)',
     color: 'Wind Chill Pearl / Black Roof',
     vinPreview: '4T1BZ1HK4RU******',
+    image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=1000&q=80',
     features: ['Cockpit Red Leather', 'JBL 9-Speaker Audio', 'Toyota Safety Sense 2.5+', 'Wireless Apple CarPlay', 'Heated Steering'],
     popular: true
   },
@@ -123,6 +125,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '2.0L 4-Cylinder Atkinson-Cycle + Dual Electric Motors (204 hp)',
     color: 'Meteorite Gray Metallic',
     vinPreview: '7FAR546H8PE******',
+    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1000&q=80',
     features: ['Hands-Free Power Tailgate', 'Bose Premium Audio', 'Wireless Phone Charger', 'Traffic Jam Assist'],
   },
   {
@@ -141,6 +144,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '3.0L MHEV Turbocharged (395 hp)',
     color: 'Santorini Black with Caraway Leather',
     vinPreview: 'SALWR2V47PA******',
+    image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1000&q=80',
     features: ['Dynamic Air Suspension', 'Pixel LED Headlights', 'Meridian 3D Sound', 'All-Wheel Steering'],
     popular: true
   },
@@ -160,6 +164,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '2.5L Smartstream 4-Cylinder (187 hp)',
     color: 'Amazon Gray',
     vinPreview: 'KM8JB3AA6RU******',
+    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=80',
     features: ['Blind-Spot View Monitor', 'Remote Smart Parking Assist', '10.25-inch Touchscreen Navigation'],
   },
   {
@@ -178,6 +183,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '2.8L GD Turbo Diesel (204 hp / 500 Nm)',
     color: 'Oxide Bronze Metallic',
     vinPreview: 'MR0KA3CD9N1******',
+    image: 'https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=1000&q=80',
     features: ['Rocco Styling Package', 'Bedliner with Sports Bar', 'Differential Lock', 'JBL Audio System', 'Pre-Crash Safety'],
   },
   {
@@ -196,6 +202,7 @@ export const VEHICLES: Vehicle[] = [
     engine: '2.4L Turbo Inline-4 (275 hp)',
     color: 'Caviar Black / Semi-Aniline Leather',
     vinPreview: '2T2HAMA37RC******',
+    image: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1000&q=80',
     features: ['14-inch Touchscreen Display', 'Mark Levinson 21-Speaker', 'Head-Up Display', 'Panorama Glass Roof'],
   }
 ];

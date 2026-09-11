@@ -31,7 +31,8 @@ import {
   Layers,
   Container,
   Luggage,
-  Star
+  Star,
+  Hotel
 } from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES, VEHICLES, SPARE_PARTS } from '../data/inventory';
 
