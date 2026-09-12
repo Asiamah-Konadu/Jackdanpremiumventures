@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { SparePart, SPARE_PARTS, EXCHANGE_RATES, CONTACT_INFO } from '../data/inventory';
+import React, { useState, useMemo, useEffect } from 'react';
+import { SparePart } from '../data/inventory';
+import { getStoredSpareParts, getStoredExchangeRates, getStoredContactInfo } from '../data/store';
 import { Wrench, ShieldCheck, CheckCircle2, MessageCircle, Search, SlidersHorizontal, Layers, Sparkles, Box, Phone } from 'lucide-react';
 
 interface SparePartsCatalogProps {
@@ -7,6 +8,21 @@ interface SparePartsCatalogProps {
 }
 
 export const SparePartsCatalog: React.FC<SparePartsCatalogProps> = ({ currentCurrency }) => {
+  const [parts, setParts] = useState<SparePart[]>(() => getStoredSpareParts());
+  const [exchangeRates, setExchangeRates] = useState(() => getStoredExchangeRates());
+  const [contactInfo, setContactInfo] = useState(() => getStoredContactInfo());
+
+  // Listen to updates from Admin Portal
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      setParts(getStoredSpareParts());
+      setExchangeRates(getStoredExchangeRates());
+      setContactInfo(getStoredContactInfo());
+    };
+    window.addEventListener('jackdan_storage_updated', handleStorageUpdate);
+    return () => window.removeEventListener('jackdan_storage_updated', handleStorageUpdate);
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [orderType, setOrderType] = useState<'retail' | 'wholesale'>('retail');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -21,17 +37,17 @@ export const SparePartsCatalog: React.FC<SparePartsCatalogProps> = ({ currentCur
     'Body & Lighting'
   ];
 
-  const currencyInfo = EXCHANGE_RATES[currentCurrency] || EXCHANGE_RATES.USD;
+  const currencyInfo = exchangeRates[currentCurrency] || exchangeRates.USD;
 
   const formatPrice = (priceInUSD: number) => {
     // If wholesale, apply 15% wholesale discount display
     const price = orderType === 'wholesale' ? priceInUSD * 0.85 : priceInUSD;
-    const converted = price * currencyInfo.rateFromUSD;
-    return `${currencyInfo.symbol} ${converted.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const converted = price * (currencyInfo?.rateFromUSD || 1);
+    return `${currencyInfo?.symbol || '$'} ${converted.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
   const filteredParts = useMemo(() => {
-    return SPARE_PARTS.filter((part) => {
+    return parts.filter((part) => {
       const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
       const query = searchQuery.toLowerCase().trim();
       const matchesSearch = !query ||
@@ -42,12 +58,12 @@ export const SparePartsCatalog: React.FC<SparePartsCatalogProps> = ({ currentCur
 
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [parts, selectedCategory, searchQuery]);
 
   const getWhatsAppPartLink = (part: SparePart) => {
     const typeLabel = orderType === 'wholesale' ? 'Wholesale Batch' : 'Single Retail';
     const text = `Hello Jackdan Premium Ventures! I would like to order / inquire about the genuine spare part: "${part.name}" (Part No: ${part.partNumber}) for ${typeLabel} supply. Price: ${formatPrice(part.priceUSD)}. Please confirm stock and delivery timeline.`;
-    return `https://wa.me/${CONTACT_INFO.primaryPhoneFormatted}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${contactInfo.primaryPhoneFormatted}?text=${encodeURIComponent(text)}`;
   };
 
   return (
@@ -229,7 +245,7 @@ export const SparePartsCatalog: React.FC<SparePartsCatalogProps> = ({ currentCur
 
           <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
             <a
-              href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted}?text=${encodeURIComponent("Hello Jackdan, I would like to request a wholesale bulk container quote for spare parts.")}`}
+              href={`https://wa.me/${contactInfo.primaryPhoneFormatted}?text=${encodeURIComponent("Hello Jackdan, I would like to request a wholesale bulk container quote for spare parts.")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="gold-gradient-btn px-6 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2"

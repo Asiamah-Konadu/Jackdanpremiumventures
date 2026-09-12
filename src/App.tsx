@@ -9,14 +9,45 @@ import { SisterVentures } from './components/SisterVentures';
 import { TwumaascoLogistics } from './components/TwumaascoLogistics';
 import { JackdanTravelTour } from './components/JackdanTravelTour';
 import { ContactSection } from './components/ContactSection';
+import { AdminPortal } from './components/AdminPortal';
 import { Footer } from './components/Footer';
 import { CONTACT_INFO } from './data/inventory';
 import { MessageSquare, ArrowLeft, Car, Wrench, Calculator, Compass, Search, Phone, Ship, Plane, Building2 } from 'lucide-react';
 
+const getInitialPageFromUrl = (): string => {
+  try {
+    const path = window.location.pathname.toLowerCase().replace(/^\/+|\/+$/g, '');
+    const hash = window.location.hash.toLowerCase().replace(/^#+/, '');
+    const target = path || hash;
+
+    if (target === 'admin' || target.startsWith('admin')) return 'admin';
+    if (target === 'inventory' || target === 'vehicles') return 'inventory';
+    if (target === 'parts' || target === 'spare-parts') return 'parts';
+    if (target === 'calculator' || target === 'duty') return 'calculator';
+    if (target === 'tracker' || target === 'track') return 'tracker';
+    if (target === 'ventures' || target === 'sister-ventures') return 'ventures';
+    if (target === 'twumaasco-logistics' || target === 'logistics') return 'twumaasco-logistics';
+    if (target === 'travel-tour' || target === 'travel') return 'travel-tour';
+    if (target === 'contact') return 'contact';
+  } catch (err) {
+    console.error('URL parsing error:', err);
+  }
+  return 'home';
+};
+
 export function App() {
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
-  const [currentPage, setCurrentPage] = useState<string>('home');
+  const [currentPage, setCurrentPage] = useState<string>(getInitialPageFromUrl);
   const [trackerId, setTrackerId] = useState<string>('JKD-7829-GH');
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPage(getInitialPageFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Scroll to top whenever user changes page
   useEffect(() => {
@@ -24,12 +55,24 @@ export function App() {
   }, [currentPage]);
 
   const handleNavigate = (pageId: string) => {
+    let resolved = pageId;
     if (pageId === 'hero' || pageId === 'home' || pageId === 'about') {
-      setCurrentPage('home');
+      resolved = 'home';
     } else if (pageId === 'sister-ventures' || pageId === 'ventures') {
-      setCurrentPage('ventures');
-    } else {
-      setCurrentPage(pageId);
+      resolved = 'ventures';
+    }
+
+    setCurrentPage(resolved);
+
+    // Synchronize browser history and URL without reloading
+    try {
+      const urlPath = resolved === 'home' ? '/' : `/${resolved}`;
+      if (window.location.pathname !== urlPath) {
+        window.history.pushState({ page: resolved }, '', urlPath);
+      }
+    } catch (err) {
+      // Fallback to hash if HTML5 history is restricted
+      window.location.hash = resolved === 'home' ? '' : resolved;
     }
   };
 
@@ -89,6 +132,10 @@ export function App() {
   };
 
   const banner = getPageBanner();
+
+  if (currentPage === 'admin') {
+    return <AdminPortal onReturnHome={() => handleNavigate('home')} />;
+  }
 
   return (
     <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between overflow-x-hidden">

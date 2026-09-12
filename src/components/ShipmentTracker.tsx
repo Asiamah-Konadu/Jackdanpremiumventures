@@ -78,6 +78,19 @@ export const ShipmentTracker: React.FC<ShipmentTrackerProps> = ({ initialTrackin
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string>('');
   const [codeCopied, setCodeCopied] = useState<boolean>(false);
 
+  // Synchronize live with Admin Portal updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updated = getInitialShipments();
+      setAllShipments(updated);
+      if (activeShipment && updated[activeShipment.trackingId]) {
+        setActiveShipment(updated[activeShipment.trackingId]);
+      }
+    };
+    window.addEventListener('jackdan_storage_updated', handleStorageChange);
+    return () => window.removeEventListener('jackdan_storage_updated', handleStorageChange);
+  }, [activeShipment]);
+
   // Quick New Log Event subform
   const [newLogDate, setNewLogDate] = useState<string>('Sep 12, 2026');
   const [newLogTime, setNewLogTime] = useState<string>('10:00 GMT');

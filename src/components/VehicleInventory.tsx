@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { Vehicle, VEHICLES, EXCHANGE_RATES, CONTACT_INFO } from '../data/inventory';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Vehicle } from '../data/inventory';
+import { getStoredVehicles, getStoredExchangeRates, getStoredContactInfo } from '../data/store';
 import { 
   Fuel, Gauge, MapPin, ShieldCheck, Sparkles, MessageCircle, 
   Eye, X, CheckCircle, ArrowRight, DollarSign, Search, SlidersHorizontal 
@@ -16,6 +17,21 @@ export const VehicleInventory: React.FC<VehicleInventoryProps> = ({
   initialSearch = '',
   onSelectForCalculation
 }) => {
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => getStoredVehicles());
+  const [exchangeRates, setExchangeRates] = useState(() => getStoredExchangeRates());
+  const [contactInfo, setContactInfo] = useState(() => getStoredContactInfo());
+
+  // Listen to updates from Admin Portal
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      setVehicles(getStoredVehicles());
+      setExchangeRates(getStoredExchangeRates());
+      setContactInfo(getStoredContactInfo());
+    };
+    window.addEventListener('jackdan_storage_updated', handleStorageUpdate);
+    return () => window.removeEventListener('jackdan_storage_updated', handleStorageUpdate);
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedMake, setSelectedMake] = useState<string>('All');
   const [selectedCondition, setSelectedCondition] = useState<string>('All');
@@ -25,15 +41,15 @@ export const VehicleInventory: React.FC<VehicleInventoryProps> = ({
   const categories = ['All', 'Sedan', 'SUV', 'Truck'];
   const makes = ['All', 'Toyota', 'Hyundai', 'Honda'];
 
-  const currencyInfo = EXCHANGE_RATES[currentCurrency] || EXCHANGE_RATES.USD;
+  const currencyInfo = exchangeRates[currentCurrency] || exchangeRates.USD;
 
   const formatPrice = (priceInUSD: number) => {
-    const converted = priceInUSD * currencyInfo.rateFromUSD;
-    return `${currencyInfo.symbol} ${converted.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    const converted = priceInUSD * (currencyInfo?.rateFromUSD || 1);
+    return `${currencyInfo?.symbol || '$'} ${converted.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
   const filteredVehicles = useMemo(() => {
-    return VEHICLES.filter((vehicle) => {
+    return vehicles.filter((vehicle) => {
       const matchesCategory = selectedCategory === 'All' || vehicle.category === selectedCategory;
       const matchesMake = selectedMake === 'All' || vehicle.make === selectedMake;
       const matchesCondition = selectedCondition === 'All' || vehicle.condition.includes(selectedCondition);
@@ -48,11 +64,11 @@ export const VehicleInventory: React.FC<VehicleInventoryProps> = ({
 
       return matchesCategory && matchesMake && matchesCondition && matchesSearch;
     });
-  }, [selectedCategory, selectedMake, selectedCondition, searchQuery]);
+  }, [vehicles, selectedCategory, selectedMake, selectedCondition, searchQuery]);
 
   const getWhatsAppVehicleLink = (vehicle: Vehicle) => {
     const text = `Hello Jackdan Premium Ventures! I am interested in importing / buying the ${vehicle.name} (${formatPrice(vehicle.priceUSD)} - VIN: ${vehicle.vinPreview}). Please share full details, shipping timeline, and landing estimate.`;
-    return `https://wa.me/${CONTACT_INFO.primaryPhoneFormatted}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${contactInfo.primaryPhoneFormatted}?text=${encodeURIComponent(text)}`;
   };
 
   return (
@@ -407,7 +423,7 @@ export const VehicleInventory: React.FC<VehicleInventoryProps> = ({
             {/* Modal Footer CTAs */}
             <div className="sticky bottom-0 bg-[#0f1422]/95 backdrop-blur-md px-6 py-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-xs text-slate-400 text-center sm:text-left">
-                <span>Direct inquiry hotline: <strong className="text-amber-400">{CONTACT_INFO.phones[0]}</strong></span>
+                <span>Direct inquiry hotline: <strong className="text-amber-400">{contactInfo.phones[0]}</strong></span>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 {onSelectForCalculation && (

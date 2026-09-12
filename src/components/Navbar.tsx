@@ -16,7 +16,8 @@ import {
   Building2,
   Ship,
   Plane,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 
 import { CONTACT_INFO, EXCHANGE_RATES } from '../data/inventory';
@@ -280,6 +281,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </span>
                     </div>
                   </button>
+
+                  <div className="my-1.5 border-t border-dark-800/80" />
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavClick('admin')}
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-gold-500/10 border border-transparent hover:border-gold-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer mt-0.5"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-gold-500/15 border border-gold-500/40 flex items-center justify-center text-gold-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white group-hover/item:text-gold-300 flex items-center gap-1.5">
+                        <span>Admin Management</span>
+                        <span className="px-1.5 py-0.2 bg-gold-500/20 text-gold-400 text-[9px] rounded font-mono">STAFF</span>
+                      </span>
+                      <span className="text-[11px] text-dark-300 block leading-tight">
+                        Live Tracking, Vehicles, Parts & Rates Control
+                      </span>
+                    </div>
+                  </button>
                 </div>
               )}
             </div>
@@ -504,6 +526,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Phone className="w-4 h-4 text-gold-400" />
               <span>Contact Us</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNavClick('admin')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                activeSection === 'admin'
+                  ? 'bg-gold-500/20 border border-gold-500/50 text-gold-300 font-bold'
+                  : 'text-dark-400 hover:bg-dark-900 hover:text-gold-400'
+              }`}
+            >
+              <Lock className="w-4 h-4 text-gold-400" />
+              <div className="flex items-center justify-between w-full">
+                <span>Admin Management</span>
+                <span className="px-1.5 py-0.5 rounded bg-dark-800 text-[10px] text-gold-400 border border-dark-700 font-mono">STAFF</span>
+              </div>
             </button>
           </nav>
 

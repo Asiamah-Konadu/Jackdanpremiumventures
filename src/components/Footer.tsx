@@ -11,7 +11,8 @@ import {
   ArrowUp, 
   MessageSquare,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  Lock
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
 
@@ -214,9 +215,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             © {new Date().getFullYear()} Jackdan Premium Ventures. All rights reserved.
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <span>Tema Port MPS Terminal 3 Brokerage</span>
             <span>ICUMS Customs Compliant</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('admin')}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-dark-900 border border-dark-800 text-dark-400 hover:text-gold-400 hover:border-gold-500/40 transition-colors"
+              title="Staff & Management Console"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Admin Management</span>
+            </button>
             <button
               type="button"
               onClick={scrollToTop}
