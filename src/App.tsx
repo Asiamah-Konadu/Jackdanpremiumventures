@@ -91,7 +91,12 @@ export function App() {
   const banner = getPageBanner();
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between">
+    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between overflow-x-hidden">
+      {/* Global Ambient Background Glows that bring visuals to life on every page */}
+      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-gold-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="fixed top-1/3 -right-48 w-[650px] h-[650px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none z-0" />
+      <div className="fixed bottom-10 -left-48 w-[600px] h-[600px] bg-emerald-600/8 rounded-full blur-[150px] pointer-events-none z-0" />
+
       {/* Navigation Header */}
       <Navbar
         currentCurrency={currentCurrency}
@@ -101,7 +106,7 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         {currentPage === 'home' ? (
           /* Informational Front Website */
           <InformationalHome
@@ -110,10 +115,13 @@ export function App() {
           />
         ) : (
           /* Sub-Page Layout with Breadcrumbs */
-          <div className="pt-28 pb-20">
+          <div className="pt-28 pb-20 relative">
             {/* Top Breadcrumb & Page Banner */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-              <div className="p-6 sm:p-8 rounded-3xl bg-dark-900 border border-dark-800 shadow-xl relative overflow-hidden">
+              <div className="p-6 sm:p-8 rounded-3xl bg-dark-900/90 border border-gold-500/30 shadow-2xl shadow-black/60 relative overflow-hidden backdrop-blur-xl">
+                {/* Banner Internal Ambient Highlights */}
+                <div className="absolute -right-20 -top-20 w-80 h-80 bg-gold-500/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="space-y-1">
                     <button

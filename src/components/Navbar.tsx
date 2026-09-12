@@ -178,9 +178,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {servicesDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 rounded-2xl bg-dark-900 border border-gold-500/30 shadow-2xl p-2 z-50 animate-fadeIn">
-                  <div className="p-2 border-b border-dark-800 mb-1">
-                    <span className="text-[10px] uppercase tracking-wider text-dark-400 font-semibold block">
+                <div className="absolute top-full left-0 mt-2 w-84 rounded-2xl bg-[#0a0f1d] border-2 border-gold-500/50 shadow-2xl shadow-black p-2.5 z-50 animate-fadeIn ring-1 ring-black">
+                  <div className="px-3 py-2 border-b border-dark-700/80 mb-1.5 bg-[#0e1628] rounded-xl">
+                    <span className="text-[10px] uppercase tracking-wider text-gold-400 font-bold block">
                       Import Tools & Operations
                     </span>
                   </div>
@@ -188,16 +188,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNavClick('calculator')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-dark-800 transition-colors flex items-start gap-3 group/item"
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-[#131c2e] border border-transparent hover:border-gold-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-300 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
                       <Calculator className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="text-xs font-bold text-white group-hover/item:text-gold-300 block">
                         Ghana Duty Estimator
                       </span>
-                      <span className="text-[11px] text-dark-400 block leading-tight">
+                      <span className="text-[11px] text-dark-300 block leading-tight">
                         ICUMS tariff calculator from global ports to Tema
                       </span>
                     </div>
@@ -206,23 +206,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNavClick('tracker')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-dark-800 transition-colors flex items-start gap-3 group/item"
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-[#131c2e] border border-transparent hover:border-blue-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer mt-0.5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
                       <Ship className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-white group-hover/item:text-gold-300 block">
+                      <span className="text-xs font-bold text-white group-hover/item:text-blue-300 block">
                         Live Cargo Tracker
                       </span>
-                      <span className="text-[11px] text-dark-400 block leading-tight">
+                      <span className="text-[11px] text-dark-300 block leading-tight">
                         Monitor vessel milestones & customs release
                       </span>
                     </div>
                   </button>
 
-                  <div className="p-2 border-t border-b border-dark-800 my-1">
-                    <span className="text-[10px] uppercase tracking-wider text-dark-400 font-semibold block">
+                  <div className="px-3 py-2 border-t border-b border-dark-700/80 my-2 bg-[#0e1628] rounded-xl">
+                    <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block">
                       Sister Ventures — Dedicated Portals
                     </span>
                   </div>
@@ -230,16 +230,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNavClick('ventures')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-dark-800 transition-colors flex items-start gap-3 group/item"
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-[#131c2e] border border-transparent hover:border-gold-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-gold-500/20 border border-gold-500/40 flex items-center justify-center text-gold-300 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
                       <Building2 className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="text-xs font-bold text-white group-hover/item:text-gold-300 block">
                         Sister Ventures Overview
                       </span>
-                      <span className="text-[11px] text-dark-400 block leading-tight">
+                      <span className="text-[11px] text-dark-300 block leading-tight">
                         Full Jackdan Group Ecosystem
                       </span>
                     </div>
@@ -248,16 +248,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNavClick('twumaasco-logistics')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-dark-800 transition-colors flex items-start gap-3 group/item"
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-[#131c2e] border border-transparent hover:border-blue-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer mt-0.5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
                       <Sparkles className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="text-xs font-bold text-white group-hover/item:text-blue-300 block">
                         Twumaasco Logistics & Trading
                       </span>
-                      <span className="text-[11px] text-dark-400 block leading-tight">
+                      <span className="text-[11px] text-dark-300 block leading-tight">
                         Sea / Air Freight, Haulage & Customs Clearance
                       </span>
                     </div>
@@ -266,16 +266,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     type="button"
                     onClick={() => handleNavClick('travel-tour')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-dark-800 transition-colors flex items-start gap-3 group/item"
+                    className="w-full text-left p-2.5 rounded-xl bg-transparent hover:bg-[#131c2e] border border-transparent hover:border-emerald-500/30 transition-colors flex items-start gap-3 group/item cursor-pointer mt-0.5"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 group-hover/item:scale-110 transition-transform flex-shrink-0 mt-0.5">
                       <Building2 className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="text-xs font-bold text-white group-hover/item:text-emerald-300 block">
                         Jackdan Travel & Tour
                       </span>
-                      <span className="text-[11px] text-dark-400 block leading-tight">
+                      <span className="text-[11px] text-dark-300 block leading-tight">
                         Visa Advisory, Flights, Hotels & Safari Tours
                       </span>
                     </div>

@@ -198,13 +198,13 @@ I would like an official guaranteed quote and shipping booking with your clearin
                     id="calc-vehicle-type"
                     value={vehicleType}
                     onChange={(e) => setVehicleType(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0f172a] border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm cursor-pointer"
                   >
-                    <option value="sedan">Sedan / Coupe / Hatchback</option>
-                    <option value="suv">Compact / Midsize SUV</option>
-                    <option value="luxury_suv">Full-Size Luxury SUV (GLS, Range Rover, Escalade)</option>
-                    <option value="truck">Pickup Truck / Van (Hilux, Tundra, F-150)</option>
-                    <option value="commercial">Heavy Duty / Commercial Bus</option>
+                    <option value="sedan" className="bg-[#0f172a] text-white py-2">Sedan / Coupe / Hatchback</option>
+                    <option value="suv" className="bg-[#0f172a] text-white py-2">Compact / Midsize SUV</option>
+                    <option value="luxury_suv" className="bg-[#0f172a] text-white py-2">Full-Size Luxury SUV (GLS, Range Rover, Escalade)</option>
+                    <option value="truck" className="bg-[#0f172a] text-white py-2">Pickup Truck / Van (Hilux, Tundra, F-150)</option>
+                    <option value="commercial" className="bg-[#0f172a] text-white py-2">Heavy Duty / Commercial Bus</option>
                   </select>
                 </div>
 
@@ -216,12 +216,12 @@ I would like an official guaranteed quote and shipping booking with your clearin
                     id="calc-vehicle-age"
                     value={vehicleAge}
                     onChange={(e) => setVehicleAge(e.target.value as any)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0f172a] border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm cursor-pointer"
                   >
-                    <option value="new">Brand New (2025 - 2026)</option>
-                    <option value="1to5">1 - 5 Years Old (2021 - 2024)</option>
-                    <option value="6to10">6 - 10 Years Old (2016 - 2020)</option>
-                    <option value="over10">Over 10 Years (Subject to Over-Age Tax)</option>
+                    <option value="new" className="bg-[#0f172a] text-white py-2">Brand New (2025 - 2026)</option>
+                    <option value="1to5" className="bg-[#0f172a] text-white py-2">1 - 5 Years Old (2021 - 2024)</option>
+                    <option value="6to10" className="bg-[#0f172a] text-white py-2">6 - 10 Years Old (2016 - 2020)</option>
+                    <option value="over10" className="bg-[#0f172a] text-white py-2">Over 10 Years (Subject to Over-Age Tax)</option>
                   </select>
                 </div>
               </div>
@@ -235,10 +235,10 @@ I would like an official guaranteed quote and shipping booking with your clearin
                   id="calc-origin-hub"
                   value={originKey}
                   onChange={(e) => setOriginKey(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-[#0f172a] border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm cursor-pointer"
                 >
                   {Object.entries(ORIGIN_HUBS).map(([key, opt]) => (
-                    <option key={key} value={key}>
+                    <option key={key} value={key} className="bg-[#0f172a] text-white py-2">
                       {opt.country} — {opt.port} ({opt.transitDays})
                     </option>
                   ))}
@@ -254,7 +254,7 @@ I would like an official guaranteed quote and shipping booking with your clearin
                   <button
                     type="button"
                     onClick={() => setShippingMethod('roro')}
-                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 cursor-pointer ${
                       shippingMethod === 'roro'
                         ? 'border-gold-500 bg-gold-500/10 text-gold-300 font-semibold shadow-lg shadow-gold-500/10'
                         : 'border-dark-700 bg-dark-900/60 text-dark-300 hover:border-dark-600'
@@ -267,7 +267,7 @@ I would like an official guaranteed quote and shipping booking with your clearin
                   <button
                     type="button"
                     onClick={() => setShippingMethod('container')}
-                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 cursor-pointer ${
                       shippingMethod === 'container'
                         ? 'border-gold-500 bg-gold-500/10 text-gold-300 font-semibold shadow-lg shadow-gold-500/10'
                         : 'border-dark-700 bg-dark-900/60 text-dark-300 hover:border-dark-600'
@@ -280,7 +280,7 @@ I would like an official guaranteed quote and shipping booking with your clearin
                   <button
                     type="button"
                     onClick={() => setShippingMethod('air')}
-                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                    className={`py-3 px-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1 cursor-pointer ${
                       shippingMethod === 'air'
                         ? 'border-gold-500 bg-gold-500/10 text-gold-300 font-semibold shadow-lg shadow-gold-500/10'
                         : 'border-dark-700 bg-dark-900/60 text-dark-300 hover:border-dark-600'
@@ -302,10 +302,10 @@ I would like an official guaranteed quote and shipping booking with your clearin
                     id="calc-destination-port"
                     value={destinationPort}
                     onChange={(e) => setDestinationPort(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0f172a] border border-dark-700 text-white focus:border-gold-500 focus:outline-none transition-colors text-sm cursor-pointer"
                   >
-                    <option value="tema">Port of Tema (MPS Terminal 3)</option>
-                    <option value="takoradi">Port of Takoradi</option>
+                    <option value="tema" className="bg-[#0f172a] text-white py-2">Port of Tema (MPS Terminal 3)</option>
+                    <option value="takoradi" className="bg-[#0f172a] text-white py-2">Port of Takoradi</option>
                   </select>
                 </div>
 

@@ -571,6 +571,187 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
       </section>
 
+      {/* 4B. GENUINE OEM AUTO SPARE PARTS SHOWCASE (Real Inventory Images) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <Wrench className="w-3.5 h-3.5" />
+              <span>100% Genuine OEM Auto Components</span>
+            </div>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
+              Direct-Import <span className="gold-gradient-text">Auto Spare Parts</span>
+            </h2>
+            <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-xl">
+              Factory-certified replacement engines, gearboxes, brake kits, tropical radiators, and heavy-duty suspension assemblies imported for Toyota, Hyundai, Honda, and luxury models.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigatePage('parts')}
+            className="self-start md:self-end px-5 py-2.5 rounded-xl bg-dark-900 hover:bg-dark-800 border border-dark-700 hover:border-gold-500/40 text-gold-400 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <span>Explore All {SPARE_PARTS.length} Spare Parts</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {SPARE_PARTS.map((part) => (
+            <div
+              key={part.id}
+              className="rounded-2xl bg-dark-900/90 border border-dark-800 hover:border-gold-500/50 p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all group"
+            >
+              <div className="space-y-3">
+                {/* Real Part Image */}
+                <div className="relative rounded-xl overflow-hidden aspect-[16/11] bg-dark-950 border border-dark-800">
+                  <img
+                    src={part.image}
+                    alt={part.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  />
+                  <div className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-bold text-gold-400 border border-gold-500/30 uppercase">
+                    {part.category}
+                  </div>
+                  <div className="absolute top-2 right-2 px-2 py-1 rounded-md bg-emerald-500/20 backdrop-blur-md text-[10px] font-bold text-emerald-400 border border-emerald-500/40">
+                    In Stock
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-heading text-base font-bold text-white group-hover:text-gold-300 transition-colors line-clamp-2">
+                    {part.name}
+                  </h3>
+                  <div className="flex items-baseline gap-2 mt-1.5">
+                    <span className="text-xl font-extrabold text-gold-400 font-mono">
+                      {formatPrice(part.priceUSD)}
+                    </span>
+                    <span className="text-[11px] text-dark-400 font-mono">
+                      ({part.partNumber})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-xs text-dark-300 pt-2 border-t border-dark-800/80">
+                  <div className="text-[11px] text-dark-400 line-clamp-1">
+                    <span className="font-semibold text-dark-300">Fits:</span> {part.compatibility}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-medium">
+                    <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>{part.warranty}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-dark-800 flex items-center gap-2">
+                <a
+                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Spare Parts desk, I would like to order / inquire about: ${part.name} (${part.partNumber}) priced at ${formatPrice(part.priceUSD)}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-2.5 px-3 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Order on WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onNavigatePage('parts')}
+                  className="py-2.5 px-3 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white border border-dark-700 text-xs font-semibold cursor-pointer"
+                >
+                  Specs
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4C. TOP-RANKED INDUSTRY ACCREDITATIONS & GLOBAL TRADE RECOGNITION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-gradient-to-br from-[#0e1628] via-dark-900 to-[#0a0f1d] border-2 border-gold-500/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+          {/* Background Ambient Glow */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 space-y-8">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-dark-800 pb-6">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                  <Award className="w-4 h-4 text-gold-400" />
+                  <span>Verified Online Reputation & Rankings</span>
+                </div>
+                <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-white">
+                  Top-Ranked on Global <span className="gold-gradient-text">Auto Import & Export Directories</span>
+                </h3>
+                <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-2xl">
+                  Search <strong className="text-white font-semibold">"Jackdan Premium Ventures"</strong> online across international automotive shipping and freight indexes. Our verified track record delivers complete peace of mind.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 bg-dark-950/80 p-3.5 rounded-2xl border border-dark-700">
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
+                  </div>
+                  <span className="text-xs font-bold text-white mt-0.5">4.9 / 5.0 TrustScore</span>
+                </div>
+                <div className="h-8 w-px bg-dark-700" />
+                <div className="text-left">
+                  <div className="text-xs font-extrabold text-gold-400 font-mono">280+</div>
+                  <div className="text-[10px] text-dark-400">Verified Client Reviews</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Credential Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
+                  <Award className="w-4 h-4" />
+                </div>
+                <h4 className="font-heading text-sm font-bold text-white">#1 Ranking on Trade Sites</h4>
+                <p className="text-xs text-dark-400 leading-relaxed">
+                  Consistently recognized on major West Africa and international auto import/export portal rankings for transparent transactions.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h4 className="font-heading text-sm font-bold text-white">ICUMS Certified Clearing</h4>
+                <p className="text-xs text-dark-400 leading-relaxed">
+                  Registered customs house agent with Ghana Revenue Authority for zero-demurrage fast clearance at MPS Terminal 3, Tema.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+                <h4 className="font-heading text-sm font-bold text-white">Authentic OEM Guarantee</h4>
+                <p className="text-xs text-dark-400 leading-relaxed">
+                  Direct sourcing partnerships in Japan, USA, and Germany eliminating counterfeit parts and non-certified auto units.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Globe2 className="w-4 h-4" />
+                </div>
+                <h4 className="font-heading text-sm font-bold text-white">End-to-End Synergy</h4>
+                <p className="text-xs text-dark-400 leading-relaxed">
+                  Integrated with Twumaasco Logistics (Ocean & Air Haulage) and Jackdan Travel & Tour for full corporate mobility.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 5. OFFICIAL COMPANY FLYERS SHOWCASE */}
       <section className="py-16 bg-dark-900/70 border-y border-dark-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
