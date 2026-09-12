@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public read access for customers to browse inventory, spare parts, tracking, and config
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true; // In production, tighten with Firebase Auth or Firebase Admin SDK
+    }
+  }
+}

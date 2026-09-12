@@ -12,6 +12,7 @@ import { ContactSection } from './components/ContactSection';
 import { AdminPortal } from './components/AdminPortal';
 import { Footer } from './components/Footer';
 import { CONTACT_INFO } from './data/inventory';
+import { initFirestoreSync, getStoredContactInfo } from './data/store';
 import { MessageSquare, ArrowLeft, Car, Wrench, Calculator, Compass, Search, Phone, Ship, Plane, Building2 } from 'lucide-react';
 
 const getInitialPageFromUrl = (): string => {
@@ -39,6 +40,23 @@ export function App() {
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
   const [currentPage, setCurrentPage] = useState<string>(getInitialPageFromUrl);
   const [trackerId, setTrackerId] = useState<string>('JKD-7829-GH');
+  const [contactInfo, setContactInfo] = useState(() => getStoredContactInfo());
+
+  // ── Initialise Firestore sync on mount ──
+  // Seeds Firestore with default data if empty, then sets up real-time
+  // onSnapshot listeners that push every admin change to localStorage and
+  // fire `jackdan_storage_updated` so public components re-render instantly.
+  useEffect(() => {
+    const unsubscribe = initFirestoreSync();
+    return unsubscribe; // cleanup on unmount
+  }, []);
+
+  // Keep contactInfo for WhatsApp buttons in sync
+  useEffect(() => {
+    const refresh = () => setContactInfo(getStoredContactInfo());
+    window.addEventListener('jackdan_storage_updated', refresh);
+    return () => window.removeEventListener('jackdan_storage_updated', refresh);
+  }, []);
 
   // Handle browser back/forward buttons
   useEffect(() => {

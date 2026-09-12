@@ -320,27 +320,38 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onReturnHome }) => {
   // -------------------------------------------------------------
   // BACKUP, CODE EXPORT, SETTINGS
   // -------------------------------------------------------------
-  const handleDownloadBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(exportAllDataAsJSON());
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `jackdan_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    showToast('Full system backup downloaded successfully!');
+  const handleDownloadBackup = async () => {
+    try {
+      showToast('Preparing backup from cloud database...');
+      const json = await exportAllDataAsJSON();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(json);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `jackdan_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Full system backup downloaded successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate backup.');
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader();
     if (e.target.files && e.target.files[0]) {
       fileReader.readAsText(e.target.files[0], "UTF-8");
-      fileReader.onload = (event) => {
+      fileReader.onload = async (event) => {
         const content = event.target?.result as string;
-        if (content && importAllDataFromJSON(content)) {
-          showToast('Backup restored successfully!');
-        } else {
-          alert('Invalid backup JSON format.');
+        if (content) {
+          showToast('Restoring backup to cloud...');
+          const success = await importAllDataFromJSON(content);
+          if (success) {
+            showToast('Backup restored successfully!');
+          } else {
+            alert('Invalid backup JSON format or restore failed.');
+          }
         }
       };
     }
@@ -1239,9 +1250,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onReturnHome }) => {
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to reset everything back to initial defaults?')) {
-                    resetAllToFactoryDefaults();
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to reset everything back to initial defaults? This will restore cloud database and local cache to original factory seeds.')) {
+                    showToast('Resetting database...');
+                    await resetAllToFactoryDefaults();
                     showToast('Reset all datasets back to default.');
                   }
                 }}
