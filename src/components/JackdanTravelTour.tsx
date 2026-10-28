@@ -23,6 +23,8 @@ import {
   MapPin
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
+import { TravelTourCanvasBackground } from './TravelTourCanvasBackground';
+import { TravelTourWebGL } from './TravelTourWebGL';
 
 export const JackdanTravelTour: React.FC = () => {
   const [flyerModalOpen, setFlyerModalOpen] = useState(false);
@@ -173,8 +175,11 @@ I would like to make a travel inquiry:
 
   return (
     <div className="space-y-20 pb-20">
-      {/* 1. Hero Section */}
+      {/* 1. Hero Section with Dedicated WebGL & Canvas */}
       <section className="relative pt-12 pb-16 overflow-hidden bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950 border-b border-dark-800">
+        {/* Worldwide Aviation & Tourism Canvas Background */}
+        <TravelTourCanvasBackground />
+
         {/* Glow ambient background */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -183,7 +188,7 @@ I would like to make a travel inquiry:
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Col: Hero Information */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
                 <Plane className="w-4 h-4 text-emerald-400" />
                 <span>Jackdan Group Sister Venture • Worldwide Travel & Tourism</span>
               </div>
@@ -240,56 +245,12 @@ I would like to make a travel inquiry:
               </div>
             </div>
 
-            {/* Right Col: Official Travel Flyer Showcase */}
-            <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="relative w-full max-w-md group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-700 rounded-3xl blur-lg opacity-40 group-hover:opacity-75 transition duration-500" />
-
-                <div className="relative rounded-2xl bg-dark-900 border border-emerald-500/40 p-4 shadow-2xl overflow-hidden">
-                  <div className="flex items-center justify-between pb-3 border-b border-dark-800 mb-3">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Official Travel Flyer
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFlyerModalOpen(true)}
-                      className="text-xs text-dark-300 hover:text-white flex items-center gap-1 bg-dark-800 hover:bg-dark-700 px-2.5 py-1 rounded-lg transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Enlarge</span>
-                    </button>
-                  </div>
-
-                  <div
-                    onClick={() => setFlyerModalOpen(true)}
-                    className="cursor-pointer rounded-xl overflow-hidden bg-dark-950 border border-dark-800 relative group/img aspect-[4/5] flex items-center justify-center"
-                  >
-                    <img
-                      src="/assets/2_20260909_140845_0001.png"
-                      alt="Jackdan Travel & Tour Official Flyer"
-                      className="w-full h-full object-cover transform group-hover/img:scale-105 transition duration-500"
-                    />
-                    <div className="absolute inset-0 bg-dark-950/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xl">
-                        <Eye className="w-4 h-4" />
-                        <span>Click to Enlarge Flyer</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-dark-800 flex items-center justify-between">
-                    <span className="text-[11px] text-dark-400">Jackdan Travel & Tour</span>
-                    <button
-                      type="button"
-                      onClick={() => setFlyerModalOpen(true)}
-                      className="text-xs text-emerald-400 hover:underline font-semibold"
-                    >
-                      View Full Details
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {/* Right Col: Dedicated WebGL 3D Flight Radar & Compass Showcase */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
+              <TravelTourWebGL
+                onEnlargeFlyer={() => setFlyerModalOpen(true)}
+                onBookConsultation={() => handleWhatsAppInquiry()}
+              />
             </div>
           </div>
         </div>

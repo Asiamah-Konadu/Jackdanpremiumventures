@@ -20,6 +20,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
+import { HeroCanvasBackground } from './HeroCanvasBackground';
 
 interface SisterVenturesProps {
   onNavigate?: (pageId: string) => void;
@@ -61,6 +62,9 @@ export const SisterVentures: React.FC<SisterVenturesProps> = ({ onNavigate }) =>
 
   return (
     <section id="sister-ventures" className="py-12 bg-dark-900 relative overflow-hidden">
+      {/* Ecosystem Interactive Canvas Background */}
+      <HeroCanvasBackground />
+
       {/* Glow effects */}
       <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
