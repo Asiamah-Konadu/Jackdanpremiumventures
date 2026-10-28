@@ -8,4 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ['three'],
+          firebase: ['firebase/app', 'firebase/firestore']
+        }
+      }
+    }
+  }
 });
