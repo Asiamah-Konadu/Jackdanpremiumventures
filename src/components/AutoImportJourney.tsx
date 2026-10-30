@@ -14,6 +14,7 @@ const parts = [
 export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
   const [chapter, setChapter] = useState(0);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
       const stickyHeight = mount.parentElement?.getBoundingClientRect().height ?? window.innerHeight;
       const travel = Math.max(1, section.offsetHeight - stickyHeight);
       progress = THREE.MathUtils.clamp(-rect.top / travel, 0, 1);
+      if (progressBarRef.current) progressBarRef.current.style.transform = `scaleX(${Math.min(1, progress * 1.5 + .06)})`;
       const next = Math.min(2, Math.floor(progress * 3));
       if (next !== targetChapter) { targetChapter = next; setChapter(next); }
     };
@@ -133,7 +135,7 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
       {stories.map(({ eyebrow, title, copy, action, page, Icon }, index) => <div key={eyebrow} className={`auto-journey__story ${chapter === index ? 'is-active' : ''}`} aria-hidden={chapter !== index}>
         <div className="auto-journey__copy"><span className="auto-journey__eyebrow"><Icon size={14} />{eyebrow}</span><h1>{title}</h1><p>{copy}</p><div className="auto-journey__actions"><button onClick={() => onNavigatePage(page)} className="auto-journey__cta">{action}<ArrowRight size={17} /></button>{index === 0 && <a className="auto-journey__phone" href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`} target="_blank" rel="noreferrer">Talk to our team</a>}</div></div>
       </div>)}
-      <div className="auto-journey__footer"><span className="auto-journey__counter">0{chapter + 1}<i />03</span><div className="auto-journey__progress"><span style={{ transform: `scaleX(${Math.min(1, progress * 1.5 + .06)})` }} /></div><span className="auto-journey__scroll"><ArrowDown size={14} /> SCROLL TO EXPLORE</span><span className="auto-journey__globe"><Globe2 size={14} /> SOURCING WORLDWIDE</span></div>
+      <div className="auto-journey__footer"><span className="auto-journey__counter">0{chapter + 1}<i />03</span><div className="auto-journey__progress"><span ref={progressBarRef} /></div><span className="auto-journey__scroll"><ArrowDown size={14} /> SCROLL TO EXPLORE</span><span className="auto-journey__globe"><Globe2 size={14} /> SOURCING WORLDWIDE</span></div>
       <div className="auto-journey__steps" aria-hidden="true"><span className={chapter === 0 ? 'is-active' : ''}>01 <Car size={13} /></span><span className={chapter === 1 ? 'is-active' : ''}>02 <Wrench size={13} /></span><span className={chapter === 2 ? 'is-active' : ''}>03 <Container size={13} /></span></div>
     </div>
     <div className="auto-journey__scroll-length" aria-hidden="true" />
