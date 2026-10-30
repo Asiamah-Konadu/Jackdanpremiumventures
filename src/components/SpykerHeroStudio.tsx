@@ -21,7 +21,12 @@ import {
   Lightbulb,
   Camera,
   Play,
-  Pause
+  Pause,
+  Sun,
+  Mountain,
+  Building,
+  Anchor,
+  Globe2
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
 
@@ -161,28 +166,111 @@ const PAINT_FINISHES = [
   }
 ];
 
+// Photorealistic 360° Real Environments (Spyker "Day Behind the Wheel" concept)
+const REAL_ENVIRONMENTS = [
+  {
+    id: 'como',
+    name: 'Lake Como Dawn',
+    badge: 'Coastal Riviera',
+    file: '/textures/env_como.hdr',
+    lightColor: 0xffd899,
+    lightIntensity: 3.5,
+    icon: Sun,
+    description: 'Golden hour sunrise over misty alpine waters and coastal villas.'
+  },
+  {
+    id: 'pass',
+    name: 'Stelvio Mountain Pass',
+    badge: 'Alpine Summit',
+    file: '/textures/env_pass.hdr',
+    lightColor: 0xffffff,
+    lightIntensity: 4.2,
+    icon: Mountain,
+    description: 'Crisp mountain air, towering alpine rocks, and high-altitude winding tarmac.'
+  },
+  {
+    id: 'urban',
+    name: 'Metropolitan Overpass',
+    badge: 'Modern Architecture',
+    file: '/textures/env_urban.hdr',
+    lightColor: 0xe0ecf8,
+    lightIntensity: 3.8,
+    icon: Building,
+    description: 'Contemporary architectural bridge, geometric concrete, and skyline horizon.'
+  },
+  {
+    id: 'harbor',
+    name: 'Port of Tema Coastline',
+    badge: 'Maritime Terminal',
+    file: '/textures/env_harbor.hdr',
+    lightColor: 0xffe6c2,
+    lightIntensity: 3.6,
+    icon: Anchor,
+    description: 'Atlantic ocean breeze, maritime horizon, and coastal sunrise.'
+  }
+];
+
+// Procedural Canvas Asphalt Texture Generator
+const generateAsphaltTexture = (): THREE.CanvasTexture => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d')!;
+
+  // 1. Dark charcoal asphalt base
+  ctx.fillStyle = '#10141a';
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  // 2. High-density aggregate grain noise
+  const imgData = ctx.getImageData(0, 0, 1024, 1024);
+  const data = imgData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const grain = (Math.random() - 0.5) * 32;
+    data[i] = Math.max(0, Math.min(255, data[i] + grain));
+    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + grain));
+    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + grain));
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  // 3. Double Golden Meridian Center Stripes
+  ctx.fillStyle = '#e8be5b';
+  ctx.fillRect(504, 0, 6, 1024);
+  ctx.fillRect(514, 0, 6, 1024);
+
+  // 4. White Solid Road Shoulder Boundary Lines
+  ctx.fillStyle = 'rgba(235, 242, 250, 0.75)';
+  ctx.fillRect(160, 0, 10, 1024);
+  ctx.fillRect(854, 0, 10, 1024);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 14);
+  return texture;
+};
+
 export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   onNavigatePage,
   onOpenFlyerModal
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [selectedFinish, setSelectedFinish] = useState(PAINT_FINISHES[0]); // Default Champagne Oro Gold
+  const [selectedEnv, setSelectedEnv] = useState(REAL_ENVIRONMENTS[0]); // Default Lake Como Dawn
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [isAudioActive, setIsAudioActive] = useState(false);
-  const [driveMode, setDriveMode] = useState<'track' | 'meridian' | 'port'>('meridian');
   const [cameraView, setCameraView] = useState<'hero' | 'profile' | 'front' | 'cockpit' | 'rear'>('hero');
   const [isRotating, setIsRotating] = useState(true);
   const [headlightsOn, setHeadlightsOn] = useState(true);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
 
-  // Audio Context ref
+  // Audio Context Ref
   const audioCtxRef = useRef<AudioContext | null>(null);
   const osc1Ref = useRef<OscillatorNode | null>(null);
   const osc2Ref = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
 
-  // Three.js Scene References
+  // Three.js References
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -192,7 +280,9 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   const wheelsRef = useRef<THREE.Object3D[]>([]);
   const headlightLightsRef = useRef<THREE.SpotLight[]>([]);
   const headlightConesRef = useRef<THREE.Mesh[]>([]);
-  
+  const overheadSpotRef = useRef<THREE.SpotLight | null>(null);
+  const pmremRef = useRef<THREE.PMREMGenerator | null>(null);
+
   // Camera Interpolation Targets
   const targetCamPos = useRef(new THREE.Vector3(4.5, 1.8, 4.2));
   const currentCamPos = useRef(new THREE.Vector3(4.5, 1.8, 4.2));
@@ -203,7 +293,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   const isDraggingRef = useRef(false);
   const prevMouseRef = useRef({ x: 0, y: 0 });
 
-  // Synthesized Web Audio Engine Rumble
+  // Web Audio Synthesizer
   const toggleAudio = () => {
     if (!isAudioActive) {
       try {
@@ -216,7 +306,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         masterGain.connect(ctx.destination);
         gainNodeRef.current = masterGain;
 
-        // V8 Low Idle Thrum
         const osc1 = ctx.createOscillator();
         osc1.type = 'sawtooth';
         osc1.frequency.setValueAtTime(45, ctx.currentTime);
@@ -230,7 +319,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         osc1.start();
         osc1Ref.current = osc1;
 
-        // Aerodynamic high-speed whisper
         const osc2 = ctx.createOscillator();
         osc2.type = 'sine';
         osc2.frequency.setValueAtTime(90, ctx.currentTime);
@@ -269,7 +357,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     };
   }, []);
 
-  // Main Three.js Scene Setup & Model Loading
+  // Main Three.js Scene Setup with Real Surrounding
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -277,88 +365,136 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 560;
 
-    // 1. Scene with Deep Atmospheric Fog
+    // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.fog = new THREE.FogExp2(0x06090e, 0.022);
 
     // 2. Camera Setup
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 150);
     camera.position.set(4.5, 1.8, 4.2);
     camera.lookAt(0, 0.35, 0);
     cameraRef.current = camera;
 
-    // 3. WebGL Renderer with High-End Tone Mapping
+    // 3. WebGL Renderer with ACES Tone Mapping
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true,
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.15;
     rendererRef.current = renderer;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // 4. Photorealistic Environment Lighting (HDR PMREM)
+    // 4. Photorealistic 360° Real Environment Background & Reflections
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
+    pmremRef.current = pmremGenerator;
 
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load(
-      '/textures/env.hdr',
-      (texture) => {
-        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-        scene.environment = envMap;
-        texture.dispose();
-        pmremGenerator.dispose();
-      },
-      undefined,
-      (err) => {
-        console.warn('HDR Environment load fallback:', err);
-      }
-    );
+    const loadEnvMap = (hdrPath: string) => {
+      new RGBELoader().load(
+        hdrPath,
+        (hdrTexture) => {
+          const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+          scene.environment = envMap;
+          scene.background = envMap; // Set the 360° real photographic environment background!
+          scene.backgroundBlurriness = 0.01;
+          scene.backgroundIntensity = 1.05;
+          hdrTexture.dispose();
+        },
+        undefined,
+        (err) => console.warn('HDR load failed:', err)
+      );
+    };
 
-    // 5. Studio Key & Rim Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+    loadEnvMap(selectedEnv.file);
+
+    // 5. Studio & Sun Directional Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const overheadSpot = new THREE.SpotLight(0xffffff, 3.8);
-    overheadSpot.position.set(6, 12, 6);
-    overheadSpot.angle = Math.PI / 4.2;
-    overheadSpot.penumbra = 0.8;
-    overheadSpot.decay = 1.2;
-    scene.add(overheadSpot);
+    const sunSpot = new THREE.SpotLight(selectedEnv.lightColor, selectedEnv.lightIntensity);
+    sunSpot.position.set(8, 16, 8);
+    sunSpot.angle = Math.PI / 4.2;
+    sunSpot.penumbra = 0.6;
+    sunSpot.decay = 1.1;
+    scene.add(sunSpot);
+    overheadSpotRef.current = sunSpot;
 
-    const goldBacklight = new THREE.PointLight(0xd4af37, 2.4, 25);
-    goldBacklight.position.set(-6, 3, -6);
+    const goldBacklight = new THREE.PointLight(0xd4af37, 2.2, 35);
+    goldBacklight.position.set(-8, 4, -8);
     scene.add(goldBacklight);
 
-    const cyanUnderglow = new THREE.PointLight(0x38bdf8, 1.6, 18);
-    cyanUnderglow.position.set(0, -0.8, 0);
-    scene.add(cyanUnderglow);
+    // 6. REAL PHYSICAL GROUND ROADWAY (Asphalt, markings, curbs & guardrail)
+    const roadGroup = new THREE.Group();
+    scene.add(roadGroup);
 
-    // 6. Ground Studio Platform & Radial Reflector
-    const grid = new THREE.GridHelper(36, 36, 0xd4af37, 0x172232);
-    grid.position.y = -0.01;
-    scene.add(grid);
-
-    const ringGeo = new THREE.RingGeometry(4.8, 5.2, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ 
-      color: 0xd4af37, 
-      side: THREE.DoubleSide, 
-      transparent: true, 
-      opacity: 0.35 
+    // A. Main Asphalt Road Geometry
+    const asphaltTexture = generateAsphaltTexture();
+    const roadMaterial = new THREE.MeshStandardMaterial({
+      map: asphaltTexture,
+      roughness: 0.35,
+      metalness: 0.25,
+      envMapIntensity: 1.1
     });
-    const floorRing = new THREE.Mesh(ringGeo, ringMat);
-    floorRing.rotation.x = -Math.PI / 2;
-    floorRing.position.y = 0.005;
-    scene.add(floorRing);
 
-    // 7. PBR Automotive Materials
+    const roadGeo = new THREE.PlaneGeometry(24, 120);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMaterial);
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.y = 0.002;
+    roadGroup.add(roadMesh);
+
+    // B. Beveled Curbs & Road Shoulder Along Edge
+    const curbGeo = new THREE.BoxGeometry(0.6, 0.16, 120);
+    const curbMat = new THREE.MeshStandardMaterial({
+      color: 0x2b3340,
+      roughness: 0.7,
+      metalness: 0.1
+    });
+
+    const leftCurb = new THREE.Mesh(curbGeo, curbMat);
+    leftCurb.position.set(-10.5, 0.08, 0);
+    roadGroup.add(leftCurb);
+
+    const rightCurb = new THREE.Mesh(curbGeo, curbMat);
+    rightCurb.position.set(10.5, 0.08, 0);
+    roadGroup.add(rightCurb);
+
+    // C. Highway Guardrail with Reflective Stanchions
+    const railMat = new THREE.MeshStandardMaterial({
+      color: 0x9ba6b8,
+      metalness: 0.9,
+      roughness: 0.25
+    });
+
+    const createGuardrail = (x: number) => {
+      const railMesh = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 120), railMat);
+      railMesh.position.set(x, 0.55, 0);
+      roadGroup.add(railMesh);
+
+      // Support posts every 6 meters
+      for (let z = -54; z <= 54; z += 6) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.6, 8), railMat);
+        post.position.set(x, 0.28, z);
+        roadGroup.add(post);
+
+        // Safety reflector studs
+        const stud = new THREE.Mesh(
+          new THREE.BoxGeometry(0.08, 0.08, 0.08),
+          new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+        );
+        stud.position.set(x + (x > 0 ? -0.1 : 0.1), 0.55, z);
+        roadGroup.add(stud);
+      }
+    };
+
+    createGuardrail(-11.2);
+    createGuardrail(11.2);
+
+    // 7. PBR Automotive Supercar Materials
     const bodyMat = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(selectedFinish.hex),
       metalness: selectedFinish.metalness,
@@ -408,14 +544,14 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       '/models/supercar.glb',
       (gltf) => {
         const carModel = gltf.scene;
-        
-        // Auto-center and normalize scale
+
+        // Auto-center and ground on asphalt
         const box = new THREE.Box3().setFromObject(carModel);
         const center = box.getCenter(new THREE.Vector3());
         carModel.position.sub(center);
-        carModel.position.y += (box.max.y - box.min.y) * 0.48; // Rest grounded on floor
+        carModel.position.y += (box.max.y - box.min.y) * 0.48;
 
-        // Assign high-end PBR materials by node name
+        // Assign PBR materials to node names
         const bodyObj = carModel.getObjectByName('body');
         if (bodyObj && (bodyObj as THREE.Mesh).isMesh) {
           (bodyObj as THREE.Mesh).material = bodyMat;
@@ -438,13 +574,13 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
           }
         });
 
-        // Store wheels for real-time rotation
+        // Store wheels for synchronized rotation
         ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'].forEach(name => {
           const w = carModel.getObjectByName(name);
           if (w) wheelsRef.current.push(w);
         });
 
-        // Contact Ambient Occlusion Ground Shadow
+        // Contact Ambient Occlusion Ground Shadow on Road
         const shadowTexture = new THREE.TextureLoader().load('/models/supercar_ao.png');
         const shadowPlane = new THREE.Mesh(
           new THREE.PlaneGeometry(2.7, 5.4),
@@ -453,34 +589,33 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
             blending: THREE.MultiplyBlending,
             toneMapped: false,
             transparent: true,
-            opacity: 0.85
+            opacity: 0.88
           })
         );
         shadowPlane.rotation.x = -Math.PI / 2;
-        shadowPlane.position.y = 0.012;
+        shadowPlane.position.y = 0.015;
         shadowPlane.renderOrder = 2;
         carRootGroup.add(shadowPlane);
 
-        // Projector High-Beam Headlights
+        // Projector High-Beam Headlamps Illuminating the Road Ahead
         headlightLightsRef.current = [];
         headlightConesRef.current = [];
 
         const createHeadlight = (x: number) => {
-          const spot = new THREE.SpotLight(0xa5d8ff, 6.0, 18, Math.PI / 6, 0.4, 1.2);
+          const spot = new THREE.SpotLight(0xa5d8ff, 6.0, 22, Math.PI / 5.5, 0.4, 1.2);
           spot.position.set(x, 0.55, 1.95);
-          spot.target.position.set(x * 1.5, 0.2, 10);
+          spot.target.position.set(x * 1.5, 0.05, 14);
           carRootGroup.add(spot);
           carRootGroup.add(spot.target);
           headlightLightsRef.current.push(spot);
 
-          // Volumetric Light Ray Cone
-          const beamGeo = new THREE.ConeGeometry(0.8, 6.5, 16, 1, true);
+          const beamGeo = new THREE.ConeGeometry(0.85, 7.5, 16, 1, true);
           beamGeo.rotateX(Math.PI / 2);
-          beamGeo.translate(x, 0.55, 5.2);
+          beamGeo.translate(x, 0.55, 5.8);
           const beamMat = new THREE.MeshBasicMaterial({
             color: 0x60a5fa,
             transparent: true,
-            opacity: 0.15,
+            opacity: 0.16,
             side: THREE.DoubleSide
           });
           const coneMesh = new THREE.Mesh(beamGeo, beamMat);
@@ -499,12 +634,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
           setLoadProgress(Math.round((xhr.loaded / xhr.total) * 100));
         }
       },
-      (err) => {
-        console.error('Supercar GLTF load error:', err);
-      }
+      (err) => console.error('Supercar GLTF load error:', err)
     );
 
-    // 9. Interactive Drag to Orbit Controls
+    // 9. Interactive Drag to Orbit
     const onMouseDown = (e: MouseEvent) => {
       isDraggingRef.current = true;
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
@@ -523,7 +656,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       isDraggingRef.current = false;
     };
 
-    // Mobile Touch Support
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         isDraggingRef.current = true;
@@ -552,7 +684,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('touchend', onTouchEnd);
 
-    // Resize Handler
     const onResize = () => {
       if (!container || !cameraRef.current || !rendererRef.current) return;
       const w = container.clientWidth;
@@ -563,14 +694,13 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     };
     window.addEventListener('resize', onResize);
 
-    // 10. 60 FPS Render Loop with Smooth Camera Lerp
+    // 10. 60 FPS Render Loop
     let animId: number;
     let time = 0;
 
     const animate = () => {
       time += 0.016;
 
-      // Smooth Camera & LookAt Interpolation
       currentCamPos.current.lerp(targetCamPos.current, 0.045);
       currentLookAt.current.lerp(targetLookAt.current, 0.045);
 
@@ -579,12 +709,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         cameraRef.current.lookAt(currentLookAt.current);
       }
 
-      // Auto Turntable Rotation
       if (isRotating && !isDraggingRef.current && carGroupRef.current) {
         carGroupRef.current.rotation.y += 0.0035;
       }
 
-      // Wheels Real-Time Rotation
       wheelsRef.current.forEach(wheel => {
         wheel.rotation.x = time * 4.2;
       });
@@ -615,7 +743,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     };
   }, [isRotating]);
 
-  // Synchronize Paint Livery Changes
+  // Synchronize Paint Livery
   useEffect(() => {
     if (bodyMaterialRef.current) {
       bodyMaterialRef.current.color.set(selectedFinish.hex);
@@ -628,6 +756,33 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       rimMaterialRef.current.color.set(selectedFinish.rimColor);
     }
   }, [selectedFinish]);
+
+  // Handle Real Environment Switching
+  const handleSelectEnvironment = (env: typeof REAL_ENVIRONMENTS[0]) => {
+    setSelectedEnv(env);
+    if (!sceneRef.current || !pmremRef.current) return;
+
+    const pmrem = pmremRef.current;
+    new RGBELoader().load(
+      env.file,
+      (hdrTexture) => {
+        if (!sceneRef.current) return;
+        const envMap = pmrem.fromEquirectangular(hdrTexture).texture;
+        sceneRef.current.environment = envMap;
+        sceneRef.current.background = envMap;
+        sceneRef.current.backgroundBlurriness = 0.01;
+        sceneRef.current.backgroundIntensity = 1.05;
+        hdrTexture.dispose();
+
+        if (overheadSpotRef.current) {
+          overheadSpotRef.current.color.set(env.lightColor);
+          overheadSpotRef.current.intensity = env.lightIntensity;
+        }
+      },
+      undefined,
+      (err) => console.warn('HDR reload failed:', err)
+    );
+  };
 
   // Toggle Headlights
   const toggleHeadlights = () => {
@@ -684,37 +839,37 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-[660px] lg:min-h-[780px] bg-gradient-to-b from-dark-950 via-[#070b12] to-dark-950 border-b border-dark-800 overflow-hidden flex flex-col justify-between select-none">
-      {/* Top Marque Header: Latin Axiom & Sound Control */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex items-center justify-between border-b border-white/5 pb-4">
-        {/* Left: Latin Brand Axiom & Heritage Badge */}
+    <div className="relative w-full min-h-[660px] lg:min-h-[780px] bg-dark-950 border-b border-dark-800 overflow-hidden flex flex-col justify-between select-none">
+      {/* Top Architectural Marque Header */}
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex items-center justify-between border-b border-white/10 pb-4 backdrop-blur-md bg-dark-950/40 rounded-b-2xl">
+        {/* Left: Latin Brand Axiom */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full border border-gold-500/50 flex items-center justify-center text-gold-400 font-heading text-xs font-black shadow-[0_0_20px_rgba(212,175,55,0.25)]">
+          <div className="w-9 h-9 rounded-full border border-gold-500/60 flex items-center justify-center text-gold-400 font-heading text-xs font-black shadow-[0_0_20px_rgba(212,175,55,0.3)] bg-dark-950/80">
             JKD
           </div>
           <div>
             <span className="text-[10px] sm:text-xs tracking-[0.28em] uppercase text-gold-400 font-bold block">
               "NULLA TENACI INVIA EST VIA"
             </span>
-            <span className="text-[9px] tracking-[0.16em] uppercase text-dark-400 font-mono">
+            <span className="text-[9px] tracking-[0.16em] uppercase text-dark-300 font-mono">
               For The Tenacious, No Road Is Impassable • Est. Accra 2026
             </span>
           </div>
         </div>
 
-        {/* Right: Audio Ambience & Atelier Literature */}
+        {/* Right: Audio Ambience & Controls */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleAudio}
             className={`px-3 py-1.5 rounded-full border text-[10px] tracking-[0.14em] uppercase font-bold flex items-center gap-2 transition-all ${
               isAudioActive
-                ? 'bg-gold-500/15 border-gold-500/60 text-gold-400 shadow-[0_0_20px_rgba(212,175,55,0.35)]'
-                : 'bg-dark-900/80 border-dark-700 text-dark-400 hover:text-white'
+                ? 'bg-gold-500/20 border-gold-500/80 text-gold-300 shadow-[0_0_20px_rgba(212,175,55,0.35)]'
+                : 'bg-dark-950/80 border-dark-700 text-dark-300 hover:text-white'
             }`}
           >
             {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-gold-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">Engine Audio: {isAudioActive ? 'Active' : 'Muted'}</span>
+            <span className="hidden sm:inline">V8 Audio: {isAudioActive ? 'Active' : 'Muted'}</span>
           </button>
 
           <button
@@ -722,18 +877,18 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
             onClick={toggleHeadlights}
             className={`px-3 py-1.5 rounded-full border text-[10px] tracking-wider uppercase font-semibold flex items-center gap-1.5 transition-colors ${
               headlightsOn 
-                ? 'bg-blue-500/20 border-blue-400 text-blue-300' 
-                : 'bg-dark-900/80 border-dark-700 text-dark-400 hover:text-white'
+                ? 'bg-blue-500/30 border-blue-400 text-blue-200 shadow-[0_0_15px_rgba(96,165,250,0.3)]' 
+                : 'bg-dark-950/80 border-dark-700 text-dark-300 hover:text-white'
             }`}
           >
-            <Lightbulb className="w-3 h-3" />
+            <Lightbulb className="w-3 h-3 text-blue-400" />
             <span className="hidden md:inline">LED Headlamps</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenFlyerModal}
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-900/80 border border-gold-500/30 text-gold-400 text-[10px] tracking-wider uppercase font-semibold hover:bg-gold-500/10 transition-colors"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-950/80 border border-gold-500/40 text-gold-400 text-[10px] tracking-wider uppercase font-semibold hover:bg-gold-500/10 transition-colors"
           >
             <Eye className="w-3 h-3 text-gold-400" />
             <span>Official Atelier Flyer</span>
@@ -741,8 +896,8 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         </div>
       </div>
 
-      {/* Center 3D WebGL Canvas Viewport */}
-      <div className="relative flex-1 w-full flex items-center justify-center my-2">
+      {/* Center 3D WebGL Canvas Viewport with 360° Real Environment */}
+      <div className="relative flex-1 w-full flex items-center justify-center my-1">
         <div
           ref={mountRef}
           className="w-full h-[520px] sm:h-[600px] lg:h-[680px] cursor-grab active:cursor-grabbing"
@@ -750,37 +905,51 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
 
         {/* Loading Spinner */}
         {!modelLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-950/80 backdrop-blur-md z-30 space-y-3">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-950/90 backdrop-blur-md z-30 space-y-3">
             <div className="w-12 h-12 rounded-full border-2 border-gold-500/20 border-t-gold-400 animate-spin" />
             <span className="text-xs font-mono tracking-widest text-gold-400 uppercase">
-              Rendering Supercar Geometry... {loadProgress > 0 && `${loadProgress}%`}
+              Loading 360° Real Surrounding & Geometry... {loadProgress > 0 && `${loadProgress}%`}
             </span>
           </div>
         )}
 
-        {/* Ambient Radial Vignette */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_45%,#06090e_95%)]" />
+        {/* Top Left: Real Environment Selector Pills */}
+        <div className="absolute top-4 left-4 sm:left-8 z-10 space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dark-950/85 border border-gold-500/40 text-gold-400 backdrop-blur-md font-mono text-[10px]">
+            <Globe2 className="w-3.5 h-3.5 text-gold-400" />
+            <span className="font-bold tracking-wider">360° REAL SURROUNDING:</span>
+            <span className="text-white uppercase font-semibold">{selectedEnv.name}</span>
+          </div>
 
-        {/* Top Left: Aviation Telemetry HUD */}
-        <div className="absolute top-4 left-4 sm:left-8 pointer-events-none z-10 space-y-1 font-mono text-[10px]">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-dark-950/85 border border-gold-500/30 text-gold-400 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-ping" />
-            <span className="font-bold tracking-wider">PHOTOREALISTIC MARQUE STUDIO</span>
-          </div>
-          <div className="text-dark-400 tracking-tight">
-            PHYSICAL PBR SHADER • HDR ENVMAP REFLECTIONS
-          </div>
-          <div className="text-dark-400 tracking-tight">
-            LIVERY: <strong className="text-white uppercase">{selectedFinish.name}</strong>
+          <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
+            {REAL_ENVIRONMENTS.map(env => {
+              const Icon = env.icon;
+              return (
+                <button
+                  key={env.id}
+                  type="button"
+                  onClick={() => handleSelectEnvironment(env)}
+                  title={env.description}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all ${
+                    selectedEnv.id === env.id
+                      ? 'bg-gold-500 text-dark-950 shadow-md'
+                      : 'text-dark-300 hover:text-white hover:bg-dark-800'
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
+                  <span className="hidden sm:inline">{env.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Top Right: Camera Presets */}
         <div className="absolute top-4 right-4 sm:right-8 z-10 flex flex-col items-end gap-1.5">
-          <span className="text-[9px] uppercase tracking-[0.2em] text-dark-400 font-mono">
+          <span className="text-[9px] uppercase tracking-[0.2em] text-white font-mono drop-shadow">
             Observation Angle
           </span>
-          <div className="flex items-center gap-1 bg-dark-950/90 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
+          <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
             {[
               { id: 'hero', label: '3/4 Hero' },
               { id: 'profile', label: 'Profile' },
@@ -830,8 +999,8 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
                   }}
                 >
                   <div className="relative flex items-center justify-center">
-                    <span className="absolute w-8 h-8 rounded-full bg-gold-400/20 animate-ping" />
-                    <span className="w-6 h-6 rounded-full bg-dark-950 border-2 border-gold-400 flex items-center justify-center text-[10px] font-black text-gold-400 shadow-[0_0_18px_rgba(250,204,21,0.7)] group-hover:scale-125 transition-transform">
+                    <span className="absolute w-8 h-8 rounded-full bg-gold-400/30 animate-ping" />
+                    <span className="w-6 h-6 rounded-full bg-dark-950 border-2 border-gold-400 flex items-center justify-center text-[10px] font-black text-gold-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] group-hover:scale-125 transition-transform">
                       {i + 1}
                     </span>
                     <div className="absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap hidden group-hover:block px-3 py-1.5 rounded-lg bg-dark-950/95 border border-gold-500/50 text-[10px] font-mono text-gold-300 backdrop-blur-md shadow-2xl">
@@ -901,18 +1070,18 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
 
         {/* Center Lower Drag Instruction */}
         <div className="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-10">
-          <div className="px-4 py-1.5 rounded-full bg-dark-950/85 border border-dark-800 text-[11px] text-dark-300 backdrop-blur-md flex items-center gap-2 shadow-lg">
+          <div className="px-4 py-1.5 rounded-full bg-dark-950/85 border border-dark-700/80 text-[11px] text-white backdrop-blur-md flex items-center gap-2 shadow-2xl">
             <Compass className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
-            <span>Interactive 3D Turntable • Click & Drag to Rotate 360° • Click numbered beacons to zoom</span>
+            <span>Orbit 360° to explore real surroundings • Click numbered beacons to zoom components</span>
           </div>
         </div>
       </div>
 
       {/* Bottom Aircraft Control Deck & Color Palette */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 border-t border-white/5 bg-dark-950/75 backdrop-blur-md flex flex-wrap items-center justify-between gap-6">
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 border-t border-white/10 bg-dark-950/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-6 rounded-t-2xl">
         {/* Color Palette Switcher */}
         <div className="flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-dark-400">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-dark-300">
             Exterior Livery:
           </span>
           <div className="flex items-center gap-2">
@@ -935,31 +1104,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
           </div>
         </div>
 
-        {/* Aircraft Mode Switcher */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-dark-400 hidden sm:inline">
-            Aviation Mode:
-          </span>
-          <div className="flex items-center gap-1 bg-dark-900 p-1 rounded-xl border border-dark-700">
-            {[
-              { id: 'meridian', label: 'Meridian 0° Cruising' },
-              { id: 'track', label: 'Autodrome Track' },
-              { id: 'port', label: 'Port Customs Gate' }
-            ].map(m => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setDriveMode(m.id as any)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  driveMode === m.id
-                    ? 'bg-gold-500 text-dark-950 font-bold shadow'
-                    : 'text-dark-300 hover:text-white'
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
+        {/* Active Surrounding Badge */}
+        <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-dark-300">
+          <span className="w-2 h-2 rounded-full bg-gold-400 animate-pulse" />
+          <span>Surrounding: <strong>{selectedEnv.name}</strong> ({selectedEnv.badge})</span>
         </div>
 
         {/* Primary Call-to-Action Buttons */}
