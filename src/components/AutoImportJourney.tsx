@@ -14,6 +14,7 @@ const parts = [
 export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLSpanElement>(null);
   const [chapter, setChapter] = useState(0);
 
@@ -73,6 +74,7 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
       const travel = Math.max(1, section.offsetHeight - stickyHeight);
       progress = THREE.MathUtils.clamp(-rect.top / travel, 0, 1);
       if (progressBarRef.current) progressBarRef.current.style.transform = `scaleX(${Math.min(1, progress * 1.5 + .06)})`;
+      if (visualRef.current) visualRef.current.style.setProperty('--camry-zoom', (1.03 + Math.min(1, progress * 2.5) * .13).toFixed(3));
       const next = Math.min(2, Math.floor(progress * 3));
       if (next !== targetChapter) { targetChapter = next; setChapter(next); }
     };
@@ -105,16 +107,16 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
   }, []);
 
   const stories = [
-    { eyebrow: '01 / FIND YOUR NEXT CAR', title: <>The right car.<br /><span className="gold-gradient-text">The right way home.</span></>, copy: 'Explore quality vehicles sourced internationally and imported with care by a team that knows the way.', action: 'Explore available cars', page: 'inventory', Icon: Car },
-    { eyebrow: '02 / PARTS, SOURCED RIGHT', title: <>Keep every<br /><span className="gold-gradient-text">journey moving.</span></>, copy: 'From genuine engine assemblies to braking and suspension, we source dependable parts for the cars you rely on.', action: 'Browse spare parts', page: 'parts', Icon: Wrench },
-    { eyebrow: '03 / IMPORT, MADE CLEAR', title: <>From overseas<br /><span className="gold-gradient-text">to Tema Port.</span></>, copy: 'Shipping, import support and customs clearance, handled with you from the first milestone to handover.', action: 'Plan your import', page: 'calculator', Icon: Container },
+    { moment: 'ORIGIN · 08:00', eyebrow: '01 / FIND YOUR NEXT CAR', title: <>The right car.<br /><span className="gold-gradient-text">A fresh start.</span></>, copy: 'Explore quality vehicles sourced internationally and imported with care by a team that knows the way.', action: 'Explore available cars', page: 'inventory', Icon: Car },
+    { moment: 'DETAIL · 12:30', eyebrow: '02 / PARTS, SOURCED RIGHT', title: <>Keep every<br /><span className="gold-gradient-text">journey moving.</span></>, copy: 'From genuine engine assemblies to braking and suspension, we source dependable parts for the cars you rely on.', action: 'Browse spare parts', page: 'parts', Icon: Wrench },
+    { moment: 'ARRIVAL · 16:45', eyebrow: '03 / IMPORT, MADE CLEAR', title: <>From overseas<br /><span className="gold-gradient-text">to Tema Port.</span></>, copy: 'Shipping, import support and customs clearance, handled with you from the first milestone to handover.', action: 'Plan your import', page: 'calculator', Icon: Container },
   ];
 
   return <section ref={sectionRef} className="auto-journey" aria-label="Discover Jackdan cars, parts and import services">
     <div className="auto-journey__pin">
       <div ref={mountRef} className={`auto-journey__canvas auto-journey__canvas--${chapter}`} aria-hidden="true" />
       <div className="auto-journey__glow" aria-hidden="true" />
-      <div className={`auto-journey__visual auto-journey__visual--${chapter}`} aria-hidden="true">
+      <div ref={visualRef} className={`auto-journey__visual auto-journey__visual--${chapter}`} aria-hidden="true">
         <div className={`auto-journey__camry ${chapter === 0 ? 'is-visible' : ''}`}>
           <img src="/assets/cars/toyota-camry.jpg" alt="" fetchPriority="high" />
           <span className="auto-journey__image-caption"><i /> TOYOTA CAMRY <b>·</b> SOURCED FOR YOU</span>
@@ -132,8 +134,8 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
         </div>
       </div>
       <div className="auto-journey__header"><span className="auto-journey__brand"><span className="auto-journey__brand-mark">J</span> JACKDAN <span>PREMIUM VENTURES</span></span><span className="auto-journey__location"><i /> IMPORTED WITH CARE · DELIVERED IN GHANA</span></div>
-      {stories.map(({ eyebrow, title, copy, action, page, Icon }, index) => <div key={eyebrow} className={`auto-journey__story ${chapter === index ? 'is-active' : ''}`} aria-hidden={chapter !== index}>
-        <div className="auto-journey__copy"><span className="auto-journey__eyebrow"><Icon size={14} />{eyebrow}</span><h1>{title}</h1><p>{copy}</p><div className="auto-journey__actions"><button onClick={() => onNavigatePage(page)} className="auto-journey__cta">{action}<ArrowRight size={17} /></button>{index === 0 && <a className="auto-journey__phone" href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`} target="_blank" rel="noreferrer">Talk to our team</a>}</div></div>
+      {stories.map(({ moment, eyebrow, title, copy, action, page, Icon }, index) => <div key={eyebrow} className={`auto-journey__story ${chapter === index ? 'is-active' : ''}`} aria-hidden={chapter !== index}>
+        <div className="auto-journey__copy"><span className="auto-journey__moment">{moment}</span><span className="auto-journey__eyebrow"><Icon size={14} />{eyebrow}</span><h1>{title}</h1><p>{copy}</p><div className="auto-journey__actions"><button onClick={() => onNavigatePage(page)} className="auto-journey__cta">{action}<ArrowRight size={17} /></button>{index === 0 && <a className="auto-journey__phone" href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`} target="_blank" rel="noreferrer">Talk to our team</a>}</div></div>
       </div>)}
       <div className="auto-journey__footer"><span className="auto-journey__counter">0{chapter + 1}<i />03</span><div className="auto-journey__progress"><span ref={progressBarRef} /></div><span className="auto-journey__scroll"><ArrowDown size={14} /> SCROLL TO EXPLORE</span><span className="auto-journey__globe"><Globe2 size={14} /> SOURCING WORLDWIDE</span></div>
       <div className="auto-journey__steps" aria-hidden="true"><span className={chapter === 0 ? 'is-active' : ''}>01 <Car size={13} /></span><span className={chapter === 1 ? 'is-active' : ''}>02 <Wrench size={13} /></span><span className={chapter === 2 ? 'is-active' : ''}>03 <Container size={13} /></span></div>
