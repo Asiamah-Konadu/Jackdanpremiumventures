@@ -32,10 +32,14 @@ import {
   Container,
   Luggage,
   Star,
-  Hotel
+  Hotel,
+  Volume2,
+  VolumeX,
+  Sliders,
+  ChevronDown
 } from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES, VEHICLES, SPARE_PARTS } from '../data/inventory';
-import { AutoImportJourney } from './AutoImportJourney';
+import { SpykerHeroStudio } from './SpykerHeroStudio';
 
 interface InformationalHomeProps {
   onNavigatePage: (page: string) => void;
@@ -55,8 +59,12 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
   } | null>(null);
 
   const [copiedAddress, setCopiedAddress] = useState(false);
-  const [quickDutyPrice, setQuickDutyPrice] = useState<number>(35000);
-  const [quickDutyYear, setQuickDutyYear] = useState<number>(2023);
+  
+  // Bespoke Aviation Calculator State
+  const [calcCifValue, setCalcCifValue] = useState<number>(38000);
+  const [calcYear, setCalcYear] = useState<number>(2023);
+  const [calcEngineCap, setCalcEngineCap] = useState<string>('2000-2999cc');
+  const [activeSpecsCar, setActiveSpecsCar] = useState<typeof VEHICLES[0] | null>(null);
 
   const currencyData = EXCHANGE_RATES[currentCurrency] || EXCHANGE_RATES.USD;
 
@@ -71,24 +79,51 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
     setTimeout(() => setCopiedAddress(false), 2500);
   };
 
+  // Ghana ICUMS Duty Computation logic
+  const calculateDutyBreakdown = () => {
+    const age = 2026 - calcYear;
+    const baseDutyRate = age > 10 ? 0.35 : 0.20; // Over-aged penalty
+    const importDuty = calcCifValue * baseDutyRate;
+    const vat = (calcCifValue + importDuty) * 0.15;
+    const nhil = (calcCifValue + importDuty) * 0.025;
+    const getFund = (calcCifValue + importDuty) * 0.025;
+    const ecowas = calcCifValue * 0.005;
+    const examFee = 850;
+    const totalEstimatedGhs = (importDuty + vat + nhil + getFund + ecowas) * 15.6 + examFee;
+    const totalEstimatedUsd = (importDuty + vat + nhil + getFund + ecowas) + (examFee / 15.6);
+
+    return {
+      importDuty,
+      vat,
+      nhil,
+      getFund,
+      ecowas,
+      examFee,
+      totalEstimatedUsd,
+      totalEstimatedGhs
+    };
+  };
+
+  const dutyCalc = calculateDutyBreakdown();
+
   const flyers = [
     {
       id: 'auto',
-      title: 'Jackdan Auto Import & Export Flyer',
+      title: 'Jackdan Auto Import & Export Atelier',
       subtitle: 'Your Trusted Auto Import & Export Partner',
-      description: 'Official catalog for overseas luxury SUVs, sedans, 4x4 pickups, and genuine OEM spare parts directly shipped and customs cleared at Tema Port.',
+      description: 'Official catalog for overseas luxury SUVs, grand tourers, executive sedans, and genuine OEM spare parts directly shipped and customs cleared at Tema Port.',
       image: '/assets/YOUR TRUSTED AUTO IMPORT AND EXPORT PARTNER_20260909_141036_0000.png',
-      badge: 'Main Brand Flyer',
+      badge: 'Main Brand Atelier',
       badgeColor: 'bg-gold-500/20 text-gold-400 border-gold-500/40',
       actionPage: 'inventory',
-      actionLabel: 'Browse Vehicle Inventory',
+      actionLabel: 'Browse Fleet Inventory',
       buttonBg: 'gold-gradient-btn text-dark-950 font-bold'
     },
     {
       id: 'logistics',
-      title: 'Twumaasco Logistics & Trading Flyer',
-      subtitle: 'Your Trusted Logistics Partner',
-      description: 'Official freight forwarding flyer highlighting Sea Freight (FCL/LCL), Air Freight, Bonded Storage, and West Africa road haulage.',
+      title: 'Twumaasco Logistics & Trading Division',
+      subtitle: 'Maritime & Heavy Cargo Partner',
+      description: 'Official freight forwarding catalog highlighting Sea Freight (FCL/LCL), Air Freight, Bonded Storage, and West Africa road haulage.',
       image: '/assets/1_20260909_140844_0000.png',
       badge: 'Sister Venture: Logistics',
       badgeColor: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
@@ -98,9 +133,9 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
     },
     {
       id: 'travel',
-      title: 'Jackdan Travel & Tour Flyer',
-      subtitle: 'Your Journey, Our Priority',
-      description: 'Official travel advisory flyer featuring Visa Assistance, worldwide Flight Bookings, luxury Hotel Reservations, and curated Group Safaris.',
+      title: 'Jackdan Travel & Tour Division',
+      subtitle: 'Aviation & Diplomatic Hospitality',
+      description: 'Official travel advisory portfolio featuring Visa Assistance, worldwide Flight Bookings, luxury Hotel Reservations, and curated Group Safaris.',
       image: '/assets/2_20260909_140845_0001.png',
       badge: 'Sister Venture: Travel',
       badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
@@ -110,41 +145,68 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
     }
   ];
 
-  const steps = [
+  // The 4 Cinematic Episodes ("A Day Behind the Marque" - Spyker Concept)
+  const cinematicEpisodes = [
     {
-      num: '01',
-      title: 'Consultation & Car Selection',
-      desc: 'Tell us your exact desired make, model, year, and budget. We source direct from licensed dealer auctions and showrooms across the USA, UAE, Canada, and Europe.',
+      time: '06:30 AM',
+      location: 'New York & Dubai Autodromes',
+      chapter: 'CHAPTER 01',
+      title: 'The Dawn Acquisition & Clean Provenance',
+      subtitle: 'Sourced Direct from Tier-1 Auctions & Showrooms',
+      desc: 'Before any vehicle enters our ledger, overseas agents conduct a 150-point diagnostic scan. We verify structural laser alignment, clean titles (CarFax/AutoCheck with zero flood or salvage history), and confirm genuine factory maintenance records.',
+      metrics: [
+        { label: 'Source Provenance', val: 'USA, Canada, UAE & Germany' },
+        { label: 'Title Standard', val: '100% Clean / No Accident' },
+        { label: 'Inspection Protocol', val: 'Laser Scan & Compression Test' }
+      ],
       icon: Car
     },
     {
-      num: '02',
-      title: 'Multi-Point Inspection & History',
-      desc: 'Our overseas agents inspect mechanical condition, verify clean title status (CarFax/AutoCheck), and prepare strict export clearance documentation.',
-      icon: ShieldCheck
-    },
-    {
-      num: '03',
-      title: 'Ocean Shipping & Milestone Tracking',
-      desc: 'Loaded onto secured RoRo or container vessels. You receive live Jackdan satellite tracking updates across all 5 maritime voyage milestones.',
+      time: '14:15 PM',
+      location: 'Transatlantic & Mediterranean Sea Lanes',
+      chapter: 'CHAPTER 02',
+      title: 'The High-Seas Meridian Passage',
+      subtitle: 'Secured Containerized & RoRo Maritime Transit',
+      desc: 'Loaded onto world-class ocean carriers (MSC, Maersk, Grimaldi) with satellite-linked telemetry. Your vehicle cruises with real-time waypoint monitoring across the Atlantic directly toward the Gulf of Guinea and Port of Tema.',
+      metrics: [
+        { label: 'Vessel Lines', val: 'Maersk, MSC, Grimaldi RoRo' },
+        { label: 'Transit Duration', val: '18 – 24 Days Direct' },
+        { label: 'Telemetry', val: 'Live GPS Satellite Tracking' }
+      ],
       icon: Ship
     },
     {
-      num: '04',
-      title: 'Tema Customs Clearance & Handover',
-      desc: 'Our registered ICUMS customs brokerage team clears all duties and taxes at Port of Tema, valets the car, and delivers with keys to your door.',
+      time: '18:45 PM',
+      location: 'Port of Tema — MPS Terminal 3',
+      chapter: 'CHAPTER 03',
+      title: 'The Port of Tema ICUMS Citadel',
+      subtitle: 'Zero-Demurrage Customs Duty Exemption & Fast Release',
+      desc: 'Our registered customs brokerage team executes electronic ICUMS declaration ahead of vessel arrival. We escort physical joint inspections, settle all GRA import taxes, and secure release orders within record turnaround time.',
+      metrics: [
+        { label: 'Broker Status', val: 'Registered GRA ICUMS Agent' },
+        { label: 'Demurrage Penalty', val: 'Guaranteed 0% Zero Demurrage' },
+        { label: 'Inspection', val: 'Joint Customs Physical Escort' }
+      ],
+      icon: ShieldCheck
+    },
+    {
+      time: '22:00 PM',
+      location: 'Cantonments, Airport & Nationwide Ghana',
+      chapter: 'CHAPTER 04',
+      title: 'The Sanctuary Handover & Bespoke Delivery',
+      subtitle: 'Valeted Handover with Keys, DVLA Plates & Warranty',
+      desc: 'Upon port exit, every vehicle receives high-gloss paint correction and interior ozone sterilization. Delivered via private flatbed carrier directly to your residence with valid registration, roadworthy certificates, and full keys in hand.',
+      metrics: [
+        { label: 'Delivery Range', val: 'All 16 Regions of Ghana' },
+        { label: 'Sanitization', val: 'Valeted & Ozone Purified' },
+        { label: 'Documentation', val: 'Turnkey DVLA Registration' }
+      ],
       icon: Award
     }
   ];
 
-  // Featured 3 vehicles for the homepage spotlight
-  const spotlightVehicles = VEHICLES.slice(0, 3);
-
-  // Featured 3 spare parts
-  const spotlightParts = SPARE_PARTS.slice(0, 3);
-
-  // Quick duty formula approximation for teaser widget
-  const estimatedQuickDuty = Math.round(quickDutyPrice * 0.38 + (2026 - quickDutyYear > 10 ? 3000 : 800));
+  const featuredCars = VEHICLES.slice(0, 3);
+  const featuredParts = SPARE_PARTS.slice(0, 3);
 
   useEffect(() => {
     const root = homeRef.current;
@@ -164,64 +226,444 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
   }, []);
 
   return (
-    <div ref={homeRef} className="home-editorial space-y-24 pb-28">
-      <AutoImportJourney onNavigatePage={onNavigatePage} />
+    <div ref={homeRef} className="home-editorial bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 pb-28">
+      {/* 1. HERO: SPYKER-INSPIRED 3D WEBGL STUDIO & LIVERY CONFIGURATOR */}
+      <SpykerHeroStudio
+        onNavigatePage={onNavigatePage}
+        onOpenFlyerModal={() => setActiveFlyerModal(flyers[0])}
+      />
 
-      {/* 2. KEY STATS & CREDIBILITY BAR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          <div className="p-6 rounded-2xl bg-dark-900/80 border border-dark-800 text-center space-y-1">
-            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-gold-400">10+</div>
-            <div className="text-xs sm:text-sm font-semibold text-white">Global Shipping Ports</div>
-            <div className="text-[11px] text-dark-400">USA, UAE, Europe, China, Japan</div>
-          </div>
+      {/* 2. TURNED-ALUMINUM AIRCRAFT COCKPIT INSTRUMENTATION CLUSTER */}
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+        <div className="rounded-3xl bg-gradient-to-r from-dark-900 via-dark-850 to-dark-900 border border-gold-500/30 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+            {/* Dial 1: Dyno Engine Power */}
+            <div className="relative p-5 rounded-2xl bg-dark-950/80 border border-dark-800 flex items-center gap-4 group hover:border-gold-500/50 transition-all">
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-gold-500/40 flex items-center justify-center bg-dark-900 shadow-[0_0_20px_rgba(212,175,55,0.15)] group-hover:rotate-45 transition-transform duration-700">
+                <Gauge className="w-6 h-6 text-gold-400" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-dark-400 block">
+                  Dyno Specification
+                </span>
+                <span className="text-2xl font-heading font-black text-white group-hover:text-gold-300 transition-colors">
+                  100% OEM
+                </span>
+                <span className="text-[11px] text-dark-300 block">Compression Certified</span>
+              </div>
+            </div>
 
-          <div className="p-6 rounded-2xl bg-dark-900/80 border border-dark-800 text-center space-y-1">
-            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-gold-400">100%</div>
-            <div className="text-xs sm:text-sm font-semibold text-white">Genuine OEM Parts</div>
-            <div className="text-[11px] text-dark-400">Wholesale & retail for all brands</div>
-          </div>
+            {/* Dial 2: Maritime Transit Chronometer */}
+            <div className="relative p-5 rounded-2xl bg-dark-950/80 border border-dark-800 flex items-center gap-4 group hover:border-gold-500/50 transition-all">
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-gold-500/40 flex items-center justify-center bg-dark-900 shadow-[0_0_20px_rgba(212,175,55,0.15)] group-hover:rotate-45 transition-transform duration-700">
+                <Clock className="w-6 h-6 text-gold-400" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-dark-400 block">
+                  Transit Chrono
+                </span>
+                <span className="text-2xl font-heading font-black text-white group-hover:text-gold-300 transition-colors">
+                  18–24 Days
+                </span>
+                <span className="text-[11px] text-dark-300 block">Direct Ocean Voyage</span>
+              </div>
+            </div>
 
-          <div className="p-6 rounded-2xl bg-dark-900/80 border border-dark-800 text-center space-y-1">
-            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-gold-400">ICUMS</div>
-            <div className="text-xs sm:text-sm font-semibold text-white">Registered Clearing Broker</div>
-            <div className="text-[11px] text-dark-400">Zero demurrage fast-track clearance</div>
-          </div>
+            {/* Dial 3: ICUMS Customs Clearance Guarantee */}
+            <div className="relative p-5 rounded-2xl bg-dark-950/80 border border-dark-800 flex items-center gap-4 group hover:border-gold-500/50 transition-all">
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-gold-500/40 flex items-center justify-center bg-dark-900 shadow-[0_0_20px_rgba(212,175,55,0.15)] group-hover:rotate-45 transition-transform duration-700">
+                <ShieldCheck className="w-6 h-6 text-gold-400" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-dark-400 block">
+                  Port Authority
+                </span>
+                <span className="text-2xl font-heading font-black text-white group-hover:text-gold-300 transition-colors">
+                  Zero Demurrage
+                </span>
+                <span className="text-[11px] text-dark-300 block">ICUMS Electronic Broker</span>
+              </div>
+            </div>
 
-          <div className="p-6 rounded-2xl bg-dark-900/80 border border-dark-800 text-center space-y-1">
-            <div className="font-heading text-3xl sm:text-4xl font-extrabold text-gold-400">16</div>
-            <div className="text-xs sm:text-sm font-semibold text-white">Regions in Ghana Served</div>
-            <div className="text-[11px] text-dark-400">Flatbed delivery to your doorstep</div>
+            {/* Dial 4: Nationwide Delivery Range */}
+            <div className="relative p-5 rounded-2xl bg-dark-950/80 border border-dark-800 flex items-center gap-4 group hover:border-gold-500/50 transition-all">
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-gold-500/40 flex items-center justify-center bg-dark-900 shadow-[0_0_20px_rgba(212,175,55,0.15)] group-hover:rotate-45 transition-transform duration-700">
+                <Truck className="w-6 h-6 text-gold-400" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-dark-400 block">
+                  Territory Fleet
+                </span>
+                <span className="text-2xl font-heading font-black text-white group-hover:text-gold-300 transition-colors">
+                  16 Regions
+                </span>
+                <span className="text-[11px] text-dark-300 block">Doorstep Flatbed Carrier</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 3. DEDICATED SISTER VENTURES HERO TILES (New Feature Highlight) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-3">
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Integrated Group Ventures</span>
+      {/* 3. "A DAY BEHIND THE MARQUE" — CINEMATIC SCROLLYTELLING JOURNEY (Spyker Style) */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Heading */}
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-[10px] tracking-[0.3em] font-mono uppercase text-gold-400 font-bold block mb-2">
+              The Grand Voyage Narrative
+            </span>
+            <h2 className="font-heading text-3xl sm:text-5xl font-black text-white tracking-tight">
+              A Day Behind The <span className="gold-gradient-text">Marque</span>
+            </h2>
+            <p className="mt-4 text-dark-300 text-sm sm:text-base leading-relaxed">
+              From dawn overseas auction inspection to transoceanic passage and white-glove arrival at your Ghanaian estate.
+            </p>
           </div>
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Explore Our <span className="gold-gradient-text">Dedicated Sister Portals</span>
+
+          {/* Scrollytelling Timeline Grid */}
+          <div className="space-y-12">
+            {cinematicEpisodes.map((ep, idx) => {
+              const Icon = ep.icon;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-3xl bg-gradient-to-br from-dark-900/90 via-dark-950 to-dark-900/90 border border-gold-500/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden group hover:border-gold-500/60 transition-all"
+                >
+                  {/* Subtle Ambient Radial Lighting */}
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-gold-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-gold-500/10 transition-colors" />
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                    {/* Left Col: Episode Meta (4 cols) */}
+                    <div className="lg:col-span-4 space-y-4 border-b lg:border-b-0 lg:border-r border-dark-800 pb-6 lg:pb-0 lg:pr-8">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-[11px] font-mono font-bold tracking-wider">
+                        <span>{ep.chapter}</span>
+                        <span>•</span>
+                        <span>{ep.time}</span>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-mono text-dark-400 block">
+                          Atmospheric Waypoint
+                        </span>
+                        <h4 className="font-heading text-xl font-bold text-white mt-0.5">
+                          {ep.location}
+                        </h4>
+                      </div>
+
+                      <div className="w-16 h-16 rounded-2xl bg-dark-950 border border-gold-500/40 flex items-center justify-center text-gold-400 shadow-xl group-hover:scale-110 transition-transform">
+                        <Icon className="w-8 h-8" />
+                      </div>
+                    </div>
+
+                    {/* Right Col: Narrative & Specifications (8 cols) */}
+                    <div className="lg:col-span-8 space-y-6">
+                      <div>
+                        <h3 className="font-heading text-2xl sm:text-3xl font-black text-white group-hover:text-gold-300 transition-colors">
+                          {ep.title}
+                        </h3>
+                        <p className="text-gold-400 text-xs sm:text-sm font-semibold tracking-wide uppercase mt-1">
+                          {ep.subtitle}
+                        </p>
+                      </div>
+
+                      <p className="text-dark-300 text-sm sm:text-base leading-relaxed">
+                        {ep.desc}
+                      </p>
+
+                      {/* Technical Credentials Pill Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        {ep.metrics.map((m, mIdx) => (
+                          <div key={mIdx} className="p-3.5 rounded-xl bg-dark-950/80 border border-dark-800/80">
+                            <span className="text-[10px] uppercase tracking-wider font-mono text-dark-400 block mb-1">
+                              {m.label}
+                            </span>
+                            <span className="text-xs sm:text-sm font-bold text-white">
+                              {m.val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. "THE MARQUE FLEET" — HIGH-END VEHICLE COLLECTION SHOWCASE */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-dark-800/60">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <span className="text-[10px] tracking-[0.25em] font-mono uppercase text-gold-400 font-bold block mb-2">
+              Curated Showroom Ledger
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+              The Grand <span className="gold-gradient-text">Marque Collection</span>
+            </h2>
+            <p className="text-dark-300 text-sm mt-2 max-w-xl">
+              High-economy sedans, family crossovers, and luxury 4x4 workhorses ready for immediate clearance or direct shipping.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigatePage('inventory')}
+            className="self-start md:self-end px-6 py-3 rounded-xl bg-dark-900 hover:bg-dark-800 border border-gold-500/40 text-gold-400 hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg"
+          >
+            <span>View All {VEHICLES.length} Fleet Models</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Cars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featuredCars.map((car) => (
+            <div
+              key={car.id}
+              className="rounded-3xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-800 hover:border-gold-500/50 p-6 flex flex-col justify-between space-y-6 shadow-2xl transition-all group"
+            >
+              <div className="space-y-4">
+                {/* Photo Frame */}
+                <div className="relative rounded-2xl overflow-hidden aspect-[16/10] bg-dark-950 border border-dark-800">
+                  <img
+                    src={car.image}
+                    alt={car.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
+                  />
+                  <div className="absolute top-3 left-3 px-3 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase">
+                    {car.category}
+                  </div>
+                  <div className="absolute top-3 right-3 px-3 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-white border border-dark-700">
+                    {car.year} MODEL
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-white group-hover:text-gold-300 transition-colors">
+                    {car.name}
+                  </h3>
+                  <div className="text-2xl font-black text-gold-400 font-mono mt-1">
+                    {formatPrice(car.priceUSD)}
+                  </div>
+                  <p className="text-xs text-dark-400 font-mono mt-1">{car.engine}</p>
+                </div>
+
+                {/* Spyker-Style Specs Matrix */}
+                <div className="grid grid-cols-2 gap-2 text-xs text-dark-300 pt-3 border-t border-dark-800 font-mono text-[11px]">
+                  <div className="flex items-center gap-2">
+                    <Gauge className="w-3.5 h-3.5 text-gold-400" />
+                    <span>{car.mileage}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Fuel className="w-3.5 h-3.5 text-gold-400" />
+                    <span>{car.fuelType}</span>
+                  </div>
+                  <div className="flex items-center gap-2 col-span-2 text-dark-400">
+                    <MapPin className="w-3.5 h-3.5 text-gold-400" />
+                    <span>{car.location}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-dark-800 flex items-center gap-3">
+                <a
+                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Reserve on WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => onNavigatePage('inventory')}
+                  className="py-3 px-4 rounded-xl bg-dark-900 hover:bg-dark-800 text-white border border-dark-700 text-xs font-semibold"
+                >
+                  Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. BESPOKE ICUMS IMPORT DUTY & VALUATION CONSOLE */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-gradient-to-br from-[#0c1322] via-dark-900 to-[#070b14] border-2 border-gold-500/40 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+          {/* Ambient Lighting */}
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            {/* Left Col: Sliders & Controls (7 cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/15 border border-gold-500/30 text-gold-400 text-xs font-mono font-bold uppercase tracking-wider">
+                <Calculator className="w-4 h-4 text-gold-400" />
+                <span>Port of Tema Avionics Duty Estimator</span>
+              </div>
+
+              <div>
+                <h3 className="font-heading text-2xl sm:text-4xl font-black text-white">
+                  Bespoke Customs <span className="gold-gradient-text">Valuation Console</span>
+                </h3>
+                <p className="text-dark-300 text-sm mt-2 leading-relaxed">
+                  Real-time Ghana Revenue Authority (GRA) tariff estimator. Avoid unexpected demurrage and calculate accurate import duties before overseas purchase.
+                </p>
+              </div>
+
+              {/* Slider 1: CIF Vehicle Value */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-dark-300 uppercase tracking-wider">CIF Purchase Value (USD):</span>
+                  <span className="text-xl font-bold text-gold-400 font-mono">${calcCifValue.toLocaleString()} USD</span>
+                </div>
+                <input
+                  type="range"
+                  min="8000"
+                  max="120000"
+                  step="1000"
+                  value={calcCifValue}
+                  onChange={(e) => setCalcCifValue(Number(e.target.value))}
+                  className="w-full accent-gold-500 cursor-pointer h-2 bg-dark-800 rounded-lg"
+                />
+                <div className="flex justify-between text-[10px] text-dark-500 font-mono">
+                  <span>$8,000 (Compact)</span>
+                  <span>$50,000 (Luxury SUV)</span>
+                  <span>$120,000+ (Supercar)</span>
+                </div>
+              </div>
+
+              {/* Slider 2: Manufacture Year */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-dark-300 uppercase tracking-wider">Year of Manufacture:</span>
+                  <span className="text-lg font-bold text-white font-mono">{calcYear}</span>
+                </div>
+                <input
+                  type="range"
+                  min="2014"
+                  max="2026"
+                  step="1"
+                  value={calcYear}
+                  onChange={(e) => setCalcYear(Number(e.target.value))}
+                  className="w-full accent-gold-500 cursor-pointer h-2 bg-dark-800 rounded-lg"
+                />
+                <div className="flex justify-between text-[10px] text-dark-500 font-mono">
+                  <span>2014 (Over-aged duty rate)</span>
+                  <span>2020</span>
+                  <span>2026 (Brand New)</span>
+                </div>
+              </div>
+
+              {/* Engine Class Selector */}
+              <div className="space-y-2 pt-2">
+                <span className="text-xs font-mono text-dark-300 uppercase tracking-wider block">
+                  Engine Displacement Category:
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {['1000-1999cc', '2000-2999cc', '3000cc+ / V8'].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setCalcEngineCap(cat)}
+                      className={`py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        calcEngineCap === cat
+                          ? 'bg-gold-500 text-dark-950 border-gold-400 shadow-md'
+                          : 'bg-dark-950 text-dark-300 border-dark-800 hover:border-dark-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Col: Instrument Output Dial (5 cols) */}
+            <div className="lg:col-span-5 p-6 rounded-2xl bg-dark-950 border border-gold-500/40 space-y-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-dark-800 pb-3">
+                <span className="text-[10px] font-mono tracking-widest uppercase text-gold-400 font-bold">
+                  ICUMS Duty Breakdown
+                </span>
+                <span className="text-[10px] font-mono text-dark-400">GRA TARIFF SCHEDULE</span>
+              </div>
+
+              <div className="space-y-2.5 text-xs font-mono">
+                <div className="flex justify-between text-dark-300">
+                  <span>Standard Import Duty ({calcYear < 2016 ? '35%' : '20%'}):</span>
+                  <span className="text-white">${Math.round(dutyCalc.importDuty).toLocaleString()} USD</span>
+                </div>
+                <div className="flex justify-between text-dark-300">
+                  <span>VAT (15.0%):</span>
+                  <span className="text-white">${Math.round(dutyCalc.vat).toLocaleString()} USD</span>
+                </div>
+                <div className="flex justify-between text-dark-300">
+                  <span>NHIL + GETFund (5.0%):</span>
+                  <span className="text-white">${Math.round(dutyCalc.nhil + dutyCalc.getFund).toLocaleString()} USD</span>
+                </div>
+                <div className="flex justify-between text-dark-300">
+                  <span>ECOWAS Levy (0.5%):</span>
+                  <span className="text-white">${Math.round(dutyCalc.ecowas).toLocaleString()} USD</span>
+                </div>
+              </div>
+
+              {/* Total Summary */}
+              <div className="pt-4 border-t border-dark-800 space-y-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-dark-400 block">
+                  Total Estimated Duty & Clearing:
+                </span>
+                <div className="text-3xl font-heading font-black text-gold-400 font-mono">
+                  GH₵ {Math.round(dutyCalc.totalEstimatedGhs).toLocaleString()}
+                </div>
+                <div className="text-xs text-dark-400 font-mono">
+                  Approx. ${Math.round(dutyCalc.totalEstimatedUsd).toLocaleString()} USD
+                </div>
+              </div>
+
+              <div className="pt-3">
+                <a
+                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Customs Desk, I computed an ICUMS estimate for a ${calcYear} vehicle valued at $${calcCifValue.toLocaleString()} USD (Estimated Duty: GH₵ ${Math.round(dutyCalc.totalEstimatedGhs).toLocaleString()}). Please confirm exact clearance valuation.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Verify ICUMS Duty via WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. DEDICATED SISTER VENTURES (MARITIME & AVIATION DIVISIONS) */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-dark-800/60">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-[10px] tracking-[0.25em] font-mono uppercase text-gold-400 font-bold block mb-2">
+            The Marque Conglomerate
+          </span>
+          <h2 className="font-heading text-3xl sm:text-5xl font-black text-white tracking-tight">
+            Integrated <span className="gold-gradient-text">Sister Ventures</span>
           </h2>
-          <p className="mt-3 text-dark-300 text-sm sm:text-base">
-            In addition to automotive sourcing, our group manages commercial maritime freight forwarding and international travel consultation through dedicated companies.
+          <p className="mt-3 text-dark-300 text-sm sm:text-base leading-relaxed">
+            Multimodal commercial freight forwarding with <strong>Twumaasco Logistics</strong> and global diplomatic visa advisory with <strong>Jackdan Travel & Tour</strong>.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Card 1: Twumaasco Logistics & Trading */}
-          <div className="rounded-3xl bg-gradient-to-br from-blue-950/40 via-dark-900 to-dark-900 border border-blue-500/40 p-8 shadow-2xl flex flex-col justify-between space-y-6 hover:border-blue-400 transition-all group">
+          {/* Venture 1: Twumaasco Logistics & Trading */}
+          <div className="rounded-3xl bg-gradient-to-br from-blue-950/40 via-dark-900 to-dark-950 border border-blue-500/40 p-8 shadow-2xl flex flex-col justify-between space-y-6 hover:border-blue-400 transition-all group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold uppercase tracking-wider">
-                  Commercial Freight & Haulage
+                <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-mono font-bold uppercase tracking-wider">
+                  Maritime & Air Freight Division
                 </span>
-                <span className="text-xs text-blue-400 font-semibold flex items-center gap-1">
+                <span className="text-xs text-blue-400 font-semibold flex items-center gap-1.5 font-mono">
                   <Ship className="w-4 h-4" />
-                  <span>Dedicated Portal</span>
+                  <span>PORT OF TEMA CITADEL</span>
                 </span>
               </div>
 
@@ -229,7 +671,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 <h3 className="font-heading text-2xl sm:text-3xl font-black text-white group-hover:text-blue-300 transition-colors">
                   Twumaasco Logistics & Trading
                 </h3>
-                <p className="text-blue-400 text-xs font-bold uppercase tracking-wider mt-1">
+                <p className="text-blue-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">
                   "Your Trusted Logistics Partner"
                 </p>
               </div>
@@ -241,19 +683,19 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
               <div className="grid grid-cols-2 gap-2.5 pt-2">
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Container className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>FCL & LCL Ocean Freight</span>
+                  <span>FCL & LCL Ocean Lines</span>
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Plane className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>Air Freight Cargo Express</span>
+                  <span>Air Freight Express (KIA)</span>
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Truck className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>Road Freight & Haulage</span>
+                  <span>Heavy Flatbed Haulage</span>
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>Port ICUMS Clearance</span>
+                  <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                  <span>Licensed Port Clearing</span>
                 </div>
               </div>
             </div>
@@ -264,32 +706,31 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 onClick={() => onNavigatePage('twumaasco-logistics')}
                 className="w-full sm:w-auto flex-1 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
               >
-                <span>Open Twumaasco Logistics Page</span>
+                <span>Launch Twumaasco Portal</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
               <a
-                href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent('Hello Twumaasco Logistics & Trading, I would like to inquire about freight forwarding / shipping rates.')}`}
+                href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent('Hello Twumaasco Logistics & Trading, I would like to inquire about ocean/air freight forwarding rates.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto py-3.5 px-4 rounded-xl bg-dark-950 hover:bg-dark-800 border border-dark-700 text-blue-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Quick WhatsApp Quote</span>
+                <span>Freight WhatsApp</span>
               </a>
             </div>
           </div>
 
-          {/* Card 2: Jackdan Travel & Tour */}
-          <div className="rounded-3xl bg-gradient-to-br from-emerald-950/40 via-dark-900 to-dark-900 border border-emerald-500/40 p-8 shadow-2xl flex flex-col justify-between space-y-6 hover:border-emerald-400 transition-all group">
+          {/* Venture 2: Jackdan Travel & Tour */}
+          <div className="rounded-3xl bg-gradient-to-br from-emerald-950/40 via-dark-900 to-dark-950 border border-emerald-500/40 p-8 shadow-2xl flex flex-col justify-between space-y-6 hover:border-emerald-400 transition-all group">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider">
-                  Global Travel & Hospitality
+                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold uppercase tracking-wider">
+                  Aviation & Consular Division
                 </span>
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 font-mono">
                   <Plane className="w-4 h-4" />
-                  <span>Dedicated Portal</span>
+                  <span>KOTOKA INTL AIRPORT (KIA)</span>
                 </span>
               </div>
 
@@ -297,7 +738,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 <h3 className="font-heading text-2xl sm:text-3xl font-black text-white group-hover:text-emerald-300 transition-colors">
                   Jackdan Travel & Tour
                 </h3>
-                <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mt-1">
+                <p className="text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">
                   "Your Journey, Our Priority"
                 </p>
               </div>
@@ -313,15 +754,15 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Plane className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Worldwide Flight Tickets</span>
+                  <span>Airline Flight Ticketing</span>
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Hotel className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>4 & 5-Star Hotel Stays</span>
+                  <span>Luxury Hotel Reservations</span>
                 </div>
                 <div className="p-3 rounded-xl bg-dark-950/70 border border-dark-800 text-xs text-dark-200 flex items-center gap-2">
                   <Luggage className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Safaris & Guided Tours</span>
+                  <span>Safaris & VIP Chauffeur</span>
                 </div>
               </div>
             </div>
@@ -332,10 +773,9 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 onClick={() => onNavigatePage('travel-tour')}
                 className="w-full sm:w-auto flex-1 py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
               >
-                <span>Open Jackdan Travel Page</span>
+                <span>Launch Travel Portal</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
               <a
                 href={`https://wa.me/${CONTACT_INFO.secondaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent('Hello Jackdan Travel & Tour, I would like to inquire about visa assistance / flight bookings.')}`}
                 target="_blank"
@@ -343,298 +783,24 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 className="w-full sm:w-auto py-3.5 px-4 rounded-xl bg-dark-950 hover:bg-dark-800 border border-dark-700 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Quick WhatsApp Inquiry</span>
+                <span>Travel WhatsApp</span>
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. FEATURED VEHICLE SHOWCASE SPOTLIGHT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
-              <Car className="w-3.5 h-3.5" />
-              <span>Certified Stock & Sourcing</span>
-            </div>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Popular & Practical <span className="gold-gradient-text">Vehicle Showcase</span>
-            </h2>
-            <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-xl">
-              High fuel economy sedans, reliable family crossovers, and heavy-duty 4x4 pickups — the most demanded and practical models in Ghana.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onNavigatePage('inventory')}
-            className="self-start md:self-end px-5 py-2.5 rounded-xl bg-dark-900 hover:bg-dark-800 border border-dark-700 hover:border-gold-500/40 text-gold-400 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
-          >
-            <span>View All {VEHICLES.length} Vehicles</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {spotlightVehicles.map((car) => (
-            <div
-              key={car.id}
-              className="rounded-2xl bg-dark-900/90 border border-dark-800 hover:border-gold-500/40 p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all group"
-            >
-              <div className="space-y-3">
-                {/* Image */}
-                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-dark-950 border border-dark-800">
-                  <img
-                    src={car.image}
-                    alt={car.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-                  <div className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-dark-950/80 backdrop-blur-md text-[10px] font-bold text-gold-400 border border-gold-500/30 uppercase">
-                    {car.category}
-                  </div>
-                  <div className="absolute top-2 right-2 px-2.5 py-1 rounded-md bg-dark-950/80 backdrop-blur-md text-[10px] font-bold text-white border border-dark-700">
-                    {car.year}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-heading text-lg font-bold text-white group-hover:text-gold-300 transition-colors line-clamp-1">
-                    {car.name}
-                  </h3>
-                  <div className="text-xl font-extrabold text-gold-400 font-mono mt-1">
-                    {formatPrice(car.priceUSD)}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs text-dark-300 pt-2 border-t border-dark-800">
-                  <div className="flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{car.mileage}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Fuel className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{car.fuelType}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-dark-800 flex items-center gap-2">
-                <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan, I am interested in inquiring about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-3 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Inquire</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onNavigatePage('inventory')}
-                  className="py-2.5 px-3 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white border border-dark-700 text-xs font-semibold"
-                >
-                  Details
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4B. GENUINE OEM AUTO SPARE PARTS SHOWCASE (Real Inventory Images) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
-              <Wrench className="w-3.5 h-3.5" />
-              <span>100% Genuine OEM Auto Components</span>
-            </div>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Direct-Import <span className="gold-gradient-text">Auto Spare Parts</span>
-            </h2>
-            <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-xl">
-              Factory-certified replacement engines, gearboxes, brake kits, tropical radiators, and heavy-duty suspension assemblies imported for Toyota, Hyundai, Honda, and luxury models.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onNavigatePage('parts')}
-            className="self-start md:self-end px-5 py-2.5 rounded-xl bg-dark-900 hover:bg-dark-800 border border-dark-700 hover:border-gold-500/40 text-gold-400 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <span>Explore All {SPARE_PARTS.length} Spare Parts</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SPARE_PARTS.map((part) => (
-            <div
-              key={part.id}
-              className="rounded-2xl bg-dark-900/90 border border-dark-800 hover:border-gold-500/50 p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all group"
-            >
-              <div className="space-y-3">
-                {/* Real Part Image */}
-                <div className="relative rounded-xl overflow-hidden aspect-[16/11] bg-dark-950 border border-dark-800">
-                  <img
-                    src={part.image}
-                    alt={part.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-                  <div className="absolute top-2 left-2 px-2.5 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-bold text-gold-400 border border-gold-500/30 uppercase">
-                    {part.category}
-                  </div>
-                  <div className="absolute top-2 right-2 px-2 py-1 rounded-md bg-emerald-500/20 backdrop-blur-md text-[10px] font-bold text-emerald-400 border border-emerald-500/40">
-                    In Stock
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-heading text-base font-bold text-white group-hover:text-gold-300 transition-colors line-clamp-2">
-                    {part.name}
-                  </h3>
-                  <div className="flex items-baseline gap-2 mt-1.5">
-                    <span className="text-xl font-extrabold text-gold-400 font-mono">
-                      {formatPrice(part.priceUSD)}
-                    </span>
-                    <span className="text-[11px] text-dark-400 font-mono">
-                      ({part.partNumber})
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1 text-xs text-dark-300 pt-2 border-t border-dark-800/80">
-                  <div className="text-[11px] text-dark-400 line-clamp-1">
-                    <span className="font-semibold text-dark-300">Fits:</span> {part.compatibility}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-medium">
-                    <ShieldCheck className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>{part.warranty}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-dark-800 flex items-center gap-2">
-                <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Spare Parts desk, I would like to order / inquire about: ${part.name} (${part.partNumber}) priced at ${formatPrice(part.priceUSD)}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2.5 px-3 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Order on WhatsApp</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onNavigatePage('parts')}
-                  className="py-2.5 px-3 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white border border-dark-700 text-xs font-semibold cursor-pointer"
-                >
-                  Specs
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4C. TOP-RANKED INDUSTRY ACCREDITATIONS & GLOBAL TRADE RECOGNITION */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-br from-[#0e1628] via-dark-900 to-[#0a0f1d] border-2 border-gold-500/30 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-          {/* Background Ambient Glow */}
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 space-y-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-dark-800 pb-6">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
-                  <Award className="w-4 h-4 text-gold-400" />
-                  <span>Verified Online Reputation & Rankings</span>
-                </div>
-                <h3 className="font-heading text-2xl sm:text-3xl font-extrabold text-white">
-                  Top-Ranked on Global <span className="gold-gradient-text">Auto Import & Export Directories</span>
-                </h3>
-                <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-2xl">
-                  Search <strong className="text-white font-semibold">"Jackdan Premium Ventures"</strong> online across international automotive shipping and freight indexes. Our verified track record delivers complete peace of mind.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 bg-dark-950/80 p-3.5 rounded-2xl border border-dark-700">
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-xs font-bold text-white mt-0.5">4.9 / 5.0 TrustScore</span>
-                </div>
-                <div className="h-8 w-px bg-dark-700" />
-                <div className="text-left">
-                  <div className="text-xs font-extrabold text-gold-400 font-mono">280+</div>
-                  <div className="text-[10px] text-dark-400">Verified Client Reviews</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Credential Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
-                  <Award className="w-4 h-4" />
-                </div>
-                <h4 className="font-heading text-sm font-bold text-white">#1 Ranking on Trade Sites</h4>
-                <p className="text-xs text-dark-400 leading-relaxed">
-                  Consistently recognized on major West Africa and international auto import/export portal rankings for transparent transactions.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <h4 className="font-heading text-sm font-bold text-white">ICUMS Certified Clearing</h4>
-                <p className="text-xs text-dark-400 leading-relaxed">
-                  Registered customs house agent with Ghana Revenue Authority for zero-demurrage fast clearance at MPS Terminal 3, Tema.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-                <h4 className="font-heading text-sm font-bold text-white">Authentic OEM Guarantee</h4>
-                <p className="text-xs text-dark-400 leading-relaxed">
-                  Direct sourcing partnerships in Japan, USA, and Germany eliminating counterfeit parts and non-certified auto units.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-dark-950/70 border border-dark-800/80 space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                  <Globe2 className="w-4 h-4" />
-                </div>
-                <h4 className="font-heading text-sm font-bold text-white">End-to-End Synergy</h4>
-                <p className="text-xs text-dark-400 leading-relaxed">
-                  Integrated with Twumaasco Logistics (Ocean & Air Haulage) and Jackdan Travel & Tour for full corporate mobility.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. OFFICIAL COMPANY FLYERS SHOWCASE */}
-      <section className="py-16 bg-dark-900/70 border-y border-dark-800">
+      {/* 7. OFFICIAL BRAND FLYERS & MARQUE CATALOGS */}
+      <section className="py-20 bg-dark-900/60 border-y border-dark-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Verified Portfolios</span>
-            </div>
-            <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Official Flyers & <span className="gold-gradient-text">Brand Catalogs</span>
+            <span className="text-[10px] tracking-[0.25em] font-mono uppercase text-gold-400 font-bold block mb-2">
+              Official Literature & Catalogs
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
+              Official Brand <span className="gold-gradient-text">Catalogs & Flyers</span>
             </h2>
-            <p className="mt-4 text-dark-300 text-base sm:text-lg">
+            <p className="mt-3 text-dark-300 text-sm sm:text-base leading-relaxed">
               Explore the official flyers for Jackdan Premium Ventures, Twumaasco Logistics & Trading, and Jackdan Travel & Tour. Click any flyer to zoom or download.
             </p>
           </div>
@@ -643,28 +809,26 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
             {flyers.map((flyer) => (
               <div 
                 key={flyer.id}
-                className="rounded-2xl bg-dark-800/80 border border-dark-700 hover:border-gold-500/50 shadow-2xl p-5 flex flex-col justify-between transition-all group"
+                className="rounded-3xl bg-dark-950 border border-dark-800 hover:border-gold-500/50 shadow-2xl p-6 flex flex-col justify-between transition-all group"
               >
                 <div className="space-y-4">
-                  {/* Badge */}
                   <div className="flex items-center justify-between">
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${flyer.badgeColor}`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${flyer.badgeColor}`}>
                       {flyer.badge}
                     </span>
                     <button
                       type="button"
                       onClick={() => setActiveFlyerModal(flyer)}
-                      className="text-xs text-gold-400 hover:text-white flex items-center gap-1 font-medium"
+                      className="text-xs text-gold-400 hover:text-white flex items-center gap-1 font-semibold"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Enlarge</span>
                     </button>
                   </div>
 
-                  {/* Flyer Image Container */}
                   <div 
                     onClick={() => setActiveFlyerModal(flyer)}
-                    className="relative cursor-pointer rounded-xl overflow-hidden bg-dark-950 border border-dark-700 aspect-[4/5] flex items-center justify-center group/img"
+                    className="relative cursor-pointer rounded-2xl overflow-hidden bg-dark-950 border border-dark-800 aspect-[4/5] flex items-center justify-center group/img"
                   >
                     <img
                       src={flyer.image}
@@ -679,7 +843,6 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                     </div>
                   </div>
 
-                  {/* Flyer Info */}
                   <div>
                     <h3 className="font-heading text-lg font-bold text-white group-hover:text-gold-300 transition-colors">
                       {flyer.title}
@@ -689,12 +852,11 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="pt-5 border-t border-dark-700/70 mt-5 space-y-2.5">
+                <div className="pt-5 border-t border-dark-800/80 mt-5 space-y-2.5">
                   <button
                     type="button"
                     onClick={() => onNavigatePage(flyer.actionPage)}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md ${flyer.buttonBg}`}
+                    className={`w-full py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md ${flyer.buttonBg}`}
                   >
                     <span>{flyer.actionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -704,9 +866,9 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                     href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan, I am inquiring about your ${flyer.title}.`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2 px-3 rounded-xl border border-dark-600 hover:border-green-500/50 text-dark-200 hover:text-green-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                    className="w-full py-2.5 px-3 rounded-xl border border-dark-700 hover:border-gold-500/50 text-dark-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" />
+                    <MessageSquare className="w-3.5 h-3.5 text-gold-400" />
                     <span>WhatsApp Inquiry for this Flyer</span>
                   </a>
                 </div>
@@ -716,74 +878,73 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
       </section>
 
-      {/* 6. GENUINE OEM SPARE PARTS SPOTLIGHT */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+      {/* 8. GENUINE OEM SPARE PARTS ATELIER */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-2">
-              <Wrench className="w-3.5 h-3.5" />
-              <span>OEM Genuine Auto Components</span>
-            </div>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Wholesale & Retail <span className="gold-gradient-text">Spare Parts</span>
+            <span className="text-[10px] tracking-[0.25em] font-mono uppercase text-gold-400 font-bold block mb-2">
+              Factory Precision Engineering
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+              Direct-Import <span className="gold-gradient-text">OEM Components</span>
             </h2>
-            <p className="text-dark-300 text-xs sm:text-sm mt-1 max-w-xl">
-              Direct factory OEM components for Mercedes-Benz, Toyota, Land Rover, and Lexus with warranty.
+            <p className="text-dark-300 text-sm mt-2 max-w-xl">
+              Factory replacement engines, gearboxes, brake rotors, tropical radiators, and heavy-duty suspension assemblies.
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => onNavigatePage('parts')}
-            className="self-start md:self-end px-5 py-2.5 rounded-xl bg-dark-900 hover:bg-dark-800 border border-dark-700 hover:border-gold-500/40 text-gold-400 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="self-start md:self-end px-6 py-3 rounded-xl bg-dark-900 hover:bg-dark-800 border border-gold-500/40 text-gold-400 hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg"
           >
-            <span>View All Spare Parts</span>
+            <span>View All {SPARE_PARTS.length} Parts</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {spotlightParts.map((part) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featuredParts.map((part) => (
             <div
               key={part.id}
-              className="rounded-2xl bg-dark-900/90 border border-dark-800 hover:border-gold-500/40 p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all group"
+              className="rounded-3xl bg-dark-950 border border-dark-800 hover:border-gold-500/50 p-6 flex flex-col justify-between space-y-4 shadow-2xl transition-all group"
             >
-              <div className="space-y-3">
-                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-dark-950 border border-dark-800">
+              <div className="space-y-4">
+                <div className="relative rounded-2xl overflow-hidden aspect-[16/10] bg-dark-900 border border-dark-800">
                   <img
                     src={part.image}
                     alt={part.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                   />
-                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-dark-950/80 backdrop-blur-md text-[10px] font-bold text-gold-400 border border-gold-500/30">
+                  <div className="absolute top-3 left-3 px-3 py-1 rounded bg-dark-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30">
                     {part.category}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-heading text-sm sm:text-base font-bold text-white group-hover:text-gold-300 transition-colors line-clamp-2">
+                  <h3 className="font-heading text-lg font-bold text-white group-hover:text-gold-300 transition-colors line-clamp-1">
                     {part.name}
                   </h3>
-                  <div className="text-lg font-extrabold text-gold-400 font-mono mt-1">
+                  <div className="text-xl font-extrabold text-gold-400 font-mono mt-1">
                     {formatPrice(part.priceUSD)}
                   </div>
+                  <span className="text-[11px] text-dark-400 font-mono">Part #{part.partNumber}</span>
                 </div>
 
-                <p className="text-xs text-dark-300 line-clamp-2">{part.description}</p>
-                <div className="text-[11px] text-dark-400 bg-dark-950 p-2 rounded-lg border border-dark-800">
-                  <strong className="text-white font-medium">Fits: </strong>
+                <div className="text-[11px] text-dark-300 bg-dark-900 p-3 rounded-xl border border-dark-800">
+                  <strong className="text-white block font-medium">Engine / Chassis Compatibility:</strong>
                   <span>{part.compatibility}</span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-dark-800">
+              <div className="pt-4 border-t border-dark-800">
                 <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan, I would like to order the spare part: ${part.name} (Part #${part.partNumber}).`)}`}
+                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Spare Parts desk, I would like to order: ${part.name} (Part #${part.partNumber}) priced at ${formatPrice(part.priceUSD)}.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-3 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
+                  className="w-full py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" />
+                  <MessageSquare className="w-4 h-4" />
                   <span>Order via WhatsApp</span>
                 </a>
               </div>
@@ -792,77 +953,28 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
       </section>
 
-      {/* 7. HOW IT WORKS - 4 SIMPLE STEPS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider mb-4">
-            <Clock className="w-3.5 h-3.5" />
-            <span>Transparent Workflow</span>
-          </div>
-          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-            How We Import Your Car to <span className="gold-gradient-text">Ghana</span>
-          </h2>
-          <p className="mt-4 text-dark-300 text-base sm:text-lg">
-            No confusion, no unexpected duties, no port delays. We manage every phase from overseas auction to your driveway.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step, idx) => {
-            const Icon = step.icon;
-            return (
-              <div 
-                key={idx}
-                className="p-6 rounded-2xl bg-dark-900/80 border border-dark-800 relative space-y-4 hover:border-gold-500/30 transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-2xl font-black text-gold-500/40">{step.num}</span>
-                  <div className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-400">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                </div>
-                <h3 className="font-heading text-lg font-bold text-white">{step.title}</h3>
-                <p className="text-dark-300 text-xs sm:text-sm leading-relaxed">{step.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-12 text-center">
-          <button
-            type="button"
-            onClick={() => onNavigatePage('calculator')}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl gold-gradient-btn font-bold text-sm sm:text-base shadow-xl"
-          >
-            <Calculator className="w-5 h-5" />
-            <span>Try the Ghana Auto Import & Duty Estimator</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
-
-      {/* 8. OFFICIAL HEADQUARTERS & PHYSICAL OFFICE ADDRESS (Prominent Card) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 9. HEADQUARTERS & PHYSICAL ABOSSEY OKAI CITADEL ADDRESS */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-dark-800/60">
         <div className="rounded-3xl bg-gradient-to-br from-dark-900 via-dark-950 to-dark-900 border border-gold-500/40 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Col: Address Details */}
+            {/* Left Col: Address Details (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-400 text-xs font-bold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold-500/15 border border-gold-500/40 text-gold-400 text-xs font-mono font-bold uppercase tracking-wider">
                 <MapPin className="w-4 h-4 text-gold-400" />
                 <span>Official Corporate Headquarters</span>
               </div>
 
               <div>
-                <h3 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-black text-white">
-                  Visit Jackdan Premium Ventures
+                <h3 className="font-heading text-2xl sm:text-4xl font-black text-white">
+                  Visit The Jackdan Citadel
                 </h3>
-                <p className="text-gold-400 font-bold text-sm sm:text-base uppercase tracking-wider mt-1">
+                <p className="text-gold-400 font-mono font-bold text-xs sm:text-sm uppercase tracking-wider mt-1">
                   Abossey Okai Office & Clearing Hub
                 </p>
               </div>
 
               {/* Exact Address Highlight Block */}
-              <div className="p-5 rounded-2xl bg-dark-950 border border-gold-500/30 space-y-3">
+              <div className="p-6 rounded-2xl bg-dark-950 border border-gold-500/30 space-y-4">
                 <div className="text-white font-extrabold text-sm sm:text-base tracking-wide leading-relaxed font-mono">
                   {CONTACT_INFO.companyName.toUpperCase()}
                   <br />
@@ -871,11 +983,11 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                   {CONTACT_INFO.landmark}, {CONTACT_INFO.area}, {CONTACT_INFO.city}, {CONTACT_INFO.country}
                 </div>
 
-                <div className="pt-2 border-t border-dark-800 flex flex-wrap items-center gap-3">
+                <div className="pt-3 border-t border-dark-800 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={handleCopyAddress}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-xs font-semibold transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-xs font-semibold transition-colors"
                   >
                     {copiedAddress ? (
                       <>
@@ -885,7 +997,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 text-gold-400" />
-                        <span>Copy Address</span>
+                        <span>Copy Exact Address</span>
                       </>
                     )}
                   </button>
@@ -894,7 +1006,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                     href={CONTACT_INFO.googleMapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 text-xs font-semibold transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gold-500/20 hover:bg-gold-500/30 text-gold-300 text-xs font-semibold transition-colors"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Open in Google Maps</span>
@@ -902,7 +1014,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-dark-300">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono text-dark-300">
                 <div className="flex items-center gap-2">
                   <PhoneCall className="w-4 h-4 text-gold-400 flex-shrink-0" />
                   <span>Primary Desk: <strong>{CONTACT_INFO.phones[0]}</strong></span>
@@ -917,39 +1029,39 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  <span>24/7 WhatsApp Response</span>
+                  <span>24/7 VIP Concierge WhatsApp</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Col: Direction Guide Card */}
+            {/* Right Col: Direction Guide Card (5 cols) */}
             <div className="lg:col-span-5">
-              <div className="p-6 rounded-2xl bg-dark-900 border border-dark-700/80 space-y-4">
+              <div className="p-8 rounded-2xl bg-dark-950 border border-dark-800 space-y-4">
                 <h4 className="font-heading text-lg font-bold text-white flex items-center gap-2">
                   <Compass className="w-5 h-5 text-gold-400" />
-                  <span>How to Find Us</span>
+                  <span>How to Reach Us</span>
                 </h4>
                 <p className="text-xs text-dark-300 leading-relaxed">
                   Located in the vibrant Abossey Okai commercial hub in Accra, directly opposite the <strong>Lighthouse Chapel International</strong> and near <strong>Fanmilk</strong> depot.
                 </p>
 
-                <div className="space-y-2.5 pt-2">
-                  <div className="p-3 rounded-xl bg-dark-950 border border-dark-800 text-xs text-dark-200">
+                <div className="space-y-2.5 pt-2 text-xs font-mono">
+                  <div className="p-3.5 rounded-xl bg-dark-900 border border-dark-800 text-dark-200">
                     <strong className="text-gold-400 block mb-0.5">Key Landmark:</strong>
                     Opposite Lighthouse Chapel International, Near Fanmilk
                   </div>
-                  <div className="p-3 rounded-xl bg-dark-950 border border-dark-800 text-xs text-dark-200">
+                  <div className="p-3.5 rounded-xl bg-dark-900 border border-dark-800 text-dark-200">
                     <strong className="text-gold-400 block mb-0.5">Postal Address:</strong>
                     P.O.BOX DK 1147, Accra, Ghana
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-3">
                   <a
                     href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent('Hello Jackdan, I am on my way to your Abossey Okai office and need directions.')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full py-3.5 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
                   >
                     <MessageSquare className="w-4 h-4" />
                     <span>Get Live WhatsApp Directions</span>
@@ -961,16 +1073,16 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
       </section>
 
-      {/* Flyer Modal Lightbox */}
+      {/* 10. FLYER MODAL LIGHTBOX */}
       {activeFlyerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="relative max-w-3xl w-full bg-dark-900 border border-gold-500/50 rounded-2xl overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
+          <div className="relative max-w-3xl w-full bg-dark-900 border border-gold-500/50 rounded-3xl overflow-hidden shadow-2xl p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-dark-800">
               <div>
                 <h4 className="font-heading font-bold text-white text-lg sm:text-xl">
                   {activeFlyerModal.title}
                 </h4>
-                <p className="text-gold-400 text-xs">{activeFlyerModal.subtitle}</p>
+                <p className="text-gold-400 text-xs font-mono">{activeFlyerModal.subtitle}</p>
               </div>
               <button
                 type="button"
@@ -981,7 +1093,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
               </button>
             </div>
 
-            <div className="rounded-xl overflow-hidden bg-dark-950 flex items-center justify-center max-h-[70vh]">
+            <div className="rounded-2xl overflow-hidden bg-dark-950 flex items-center justify-center max-h-[70vh]">
               <img
                 src={activeFlyerModal.image}
                 alt={activeFlyerModal.title}
@@ -989,7 +1101,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
               />
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-xs text-dark-300 max-w-md">
                 {activeFlyerModal.description}
               </p>
@@ -997,7 +1109,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                 <a
                   href={activeFlyerModal.image}
                   download
-                  className="flex-1 sm:flex-initial py-2.5 px-4 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  className="flex-1 sm:flex-initial py-3 px-4 rounded-xl bg-dark-800 hover:bg-dark-700 text-dark-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Flyer</span>
@@ -1006,7 +1118,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
                   href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan, I am looking at your flyer for ${activeFlyerModal.title} and would like to ask some questions.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial py-2.5 px-4 rounded-xl gold-gradient-btn text-xs font-bold flex items-center justify-center gap-1.5"
+                  className="flex-1 sm:flex-initial py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-1.5"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Inquire on WhatsApp</span>
