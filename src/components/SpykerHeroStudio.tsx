@@ -16,17 +16,23 @@ import {
   Eye, 
   Check, 
   Layers, 
-  Crosshair,
-  Maximize2,
-  Lightbulb,
-  Camera,
-  Play,
-  Pause,
-  Sun,
-  Mountain,
-  Building,
-  Anchor,
-  Globe2
+  Crosshair, 
+  Lightbulb, 
+  Camera, 
+  Sun, 
+  Mountain, 
+  Building, 
+  Anchor, 
+  Globe2,
+  FileText,
+  Sliders,
+  Printer,
+  Download,
+  Ruler,
+  Cpu,
+  Zap,
+  Activity,
+  Share2
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
 
@@ -34,6 +40,8 @@ interface SpykerHeroStudioProps {
   onNavigatePage: (page: string) => void;
   onOpenFlyerModal: () => void;
 }
+
+type StudioTab = '3d-studio' | 'blueprint' | 'powertrain' | 'homologation';
 
 interface Hotspot {
   id: string;
@@ -166,7 +174,6 @@ const PAINT_FINISHES = [
   }
 ];
 
-// Photorealistic 360° Real Environments (Spyker "Day Behind the Wheel" concept)
 const REAL_ENVIRONMENTS = [
   {
     id: 'como',
@@ -210,6 +217,58 @@ const REAL_ENVIRONMENTS = [
   }
 ];
 
+// Real Reference Vehicles available for Blueprint inspection
+const REFERENCE_CARS = [
+  {
+    id: 'supercar',
+    name: 'Spyker Preliator XXV / Ferrari 458 Italia',
+    class: 'Mid-Engine V8 Berlinetta',
+    length: 4628,
+    wheelbase: 2725,
+    width: 1951,
+    height: 1214,
+    weight: 1390,
+    power: '605 PS (597 hp) @ 9,000 RPM',
+    torque: '540 Nm @ 6,000 RPM',
+    acceleration: '3.4 s (0-100 km/h)',
+    topSpeed: '325 km/h (202 mph)',
+    hsCode: '8703.24.90.00',
+    clearanceClass: 'Tier-1 Luxury Sports Coupe'
+  },
+  {
+    id: 'g63',
+    name: 'Mercedes-AMG G63 Bi-Turbo V8',
+    class: 'Luxury Heavy-Duty Off-Road SUV',
+    length: 4873,
+    wheelbase: 2890,
+    width: 1984,
+    height: 1969,
+    weight: 2560,
+    power: '585 PS (577 hp) @ 6,000 RPM',
+    torque: '850 Nm @ 2,500-3,500 RPM',
+    acceleration: '4.5 s (0-100 km/h)',
+    topSpeed: '240 km/h (149 mph)',
+    hsCode: '8703.24.90.00',
+    clearanceClass: 'High-Demand Executive 4x4'
+  },
+  {
+    id: 'lc300',
+    name: 'Toyota Land Cruiser 300 VXR Twin-Turbo',
+    class: 'All-Terrain Executive Safari Flagship',
+    length: 4980,
+    wheelbase: 2850,
+    width: 1980,
+    height: 1945,
+    weight: 2630,
+    power: '415 PS (409 hp) @ 5,200 RPM',
+    torque: '650 Nm @ 2,000-3,600 RPM',
+    acceleration: '6.7 s (0-100 km/h)',
+    topSpeed: '210 km/h (130 mph)',
+    hsCode: '8703.24.90.00',
+    clearanceClass: 'Ghana Prestige Utility Fleet'
+  }
+];
+
 // Procedural Canvas Asphalt Texture Generator
 const generateAsphaltTexture = (): THREE.CanvasTexture => {
   const canvas = document.createElement('canvas');
@@ -217,11 +276,9 @@ const generateAsphaltTexture = (): THREE.CanvasTexture => {
   canvas.height = 1024;
   const ctx = canvas.getContext('2d')!;
 
-  // 1. Dark charcoal asphalt base
   ctx.fillStyle = '#10141a';
   ctx.fillRect(0, 0, 1024, 1024);
 
-  // 2. High-density aggregate grain noise
   const imgData = ctx.getImageData(0, 0, 1024, 1024);
   const data = imgData.data;
   for (let i = 0; i < data.length; i += 4) {
@@ -232,12 +289,10 @@ const generateAsphaltTexture = (): THREE.CanvasTexture => {
   }
   ctx.putImageData(imgData, 0, 0);
 
-  // 3. Double Golden Meridian Center Stripes
   ctx.fillStyle = '#e8be5b';
   ctx.fillRect(504, 0, 6, 1024);
   ctx.fillRect(514, 0, 6, 1024);
 
-  // 4. White Solid Road Shoulder Boundary Lines
   ctx.fillStyle = 'rgba(235, 242, 250, 0.75)';
   ctx.fillRect(160, 0, 10, 1024);
   ctx.fillRect(854, 0, 10, 1024);
@@ -254,8 +309,11 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   onOpenFlyerModal
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [selectedFinish, setSelectedFinish] = useState(PAINT_FINISHES[0]); // Default Champagne Oro Gold
-  const [selectedEnv, setSelectedEnv] = useState(REAL_ENVIRONMENTS[0]); // Default Lake Como Dawn
+  const [activeTab, setActiveTab] = useState<StudioTab>('3d-studio');
+  const [selectedFinish, setSelectedFinish] = useState(PAINT_FINISHES[0]);
+  const [selectedEnv, setSelectedEnv] = useState(REAL_ENVIRONMENTS[0]);
+  const [selectedReferenceCar, setSelectedReferenceCar] = useState(REFERENCE_CARS[0]);
+  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
   const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
   const [isAudioActive, setIsAudioActive] = useState(false);
   const [cameraView, setCameraView] = useState<'hero' | 'profile' | 'front' | 'cockpit' | 'rear'>('hero');
@@ -357,25 +415,24 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     };
   }, []);
 
-  // Main Three.js Scene Setup with Real Surrounding
+  // Main Three.js Scene Setup (Only runs when 3D Studio tab is active or mounted)
   useEffect(() => {
+    if (activeTab !== '3d-studio') return;
+
     const container = mountRef.current;
     if (!container) return;
 
     const width = container.clientWidth || 800;
     const height = container.clientHeight || 560;
 
-    // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 150);
     camera.position.set(4.5, 1.8, 4.2);
     camera.lookAt(0, 0.35, 0);
     cameraRef.current = camera;
 
-    // 3. WebGL Renderer with ACES Tone Mapping
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance'
@@ -389,7 +446,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // 4. Photorealistic 360° Real Environment Background & Reflections
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     pmremRef.current = pmremGenerator;
@@ -400,7 +456,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         (hdrTexture) => {
           const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
           scene.environment = envMap;
-          scene.background = envMap; // Set the 360° real photographic environment background!
+          scene.background = envMap;
           scene.backgroundBlurriness = 0.01;
           scene.backgroundIntensity = 1.05;
           hdrTexture.dispose();
@@ -412,7 +468,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
 
     loadEnvMap(selectedEnv.file);
 
-    // 5. Studio & Sun Directional Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
@@ -428,11 +483,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     goldBacklight.position.set(-8, 4, -8);
     scene.add(goldBacklight);
 
-    // 6. REAL PHYSICAL GROUND ROADWAY (Asphalt, markings, curbs & guardrail)
+    // Ground Roadway
     const roadGroup = new THREE.Group();
     scene.add(roadGroup);
 
-    // A. Main Asphalt Road Geometry
     const asphaltTexture = generateAsphaltTexture();
     const roadMaterial = new THREE.MeshStandardMaterial({
       map: asphaltTexture,
@@ -447,14 +501,9 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     roadMesh.position.y = 0.002;
     roadGroup.add(roadMesh);
 
-    // B. Beveled Curbs & Road Shoulder Along Edge
+    // Curbs
     const curbGeo = new THREE.BoxGeometry(0.6, 0.16, 120);
-    const curbMat = new THREE.MeshStandardMaterial({
-      color: 0x2b3340,
-      roughness: 0.7,
-      metalness: 0.1
-    });
-
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0x2b3340, roughness: 0.7, metalness: 0.1 });
     const leftCurb = new THREE.Mesh(curbGeo, curbMat);
     leftCurb.position.set(-10.5, 0.08, 0);
     roadGroup.add(leftCurb);
@@ -463,38 +512,27 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     rightCurb.position.set(10.5, 0.08, 0);
     roadGroup.add(rightCurb);
 
-    // C. Highway Guardrail with Reflective Stanchions
-    const railMat = new THREE.MeshStandardMaterial({
-      color: 0x9ba6b8,
-      metalness: 0.9,
-      roughness: 0.25
-    });
-
+    // Guardrails
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x9ba6b8, metalness: 0.9, roughness: 0.25 });
     const createGuardrail = (x: number) => {
       const railMesh = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 120), railMat);
       railMesh.position.set(x, 0.55, 0);
       roadGroup.add(railMesh);
 
-      // Support posts every 6 meters
       for (let z = -54; z <= 54; z += 6) {
         const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.6, 8), railMat);
         post.position.set(x, 0.28, z);
         roadGroup.add(post);
 
-        // Safety reflector studs
-        const stud = new THREE.Mesh(
-          new THREE.BoxGeometry(0.08, 0.08, 0.08),
-          new THREE.MeshBasicMaterial({ color: 0xfacc15 })
-        );
+        const stud = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
         stud.position.set(x + (x > 0 ? -0.1 : 0.1), 0.55, z);
         roadGroup.add(stud);
       }
     };
-
     createGuardrail(-11.2);
     createGuardrail(11.2);
 
-    // 7. PBR Automotive Supercar Materials
+    // Materials
     const bodyMat = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(selectedFinish.hex),
       metalness: selectedFinish.metalness,
@@ -527,7 +565,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       roughness: 0.4
     });
 
-    // 8. Load Real High-Poly Supercar Model (GLTF + DRACO)
+    // GLTF Model
     const carRootGroup = new THREE.Group();
     carGroupRef.current = carRootGroup;
     scene.add(carRootGroup);
@@ -544,43 +582,31 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       '/models/supercar.glb',
       (gltf) => {
         const carModel = gltf.scene;
-
-        // Auto-center and ground on asphalt
         const box = new THREE.Box3().setFromObject(carModel);
         const center = box.getCenter(new THREE.Vector3());
         carModel.position.sub(center);
         carModel.position.y += (box.max.y - box.min.y) * 0.48;
 
-        // Assign PBR materials to node names
         const bodyObj = carModel.getObjectByName('body');
-        if (bodyObj && (bodyObj as THREE.Mesh).isMesh) {
-          (bodyObj as THREE.Mesh).material = bodyMat;
-        }
+        if (bodyObj && (bodyObj as THREE.Mesh).isMesh) (bodyObj as THREE.Mesh).material = bodyMat;
 
         const glassObj = carModel.getObjectByName('glass');
-        if (glassObj && (glassObj as THREE.Mesh).isMesh) {
-          (glassObj as THREE.Mesh).material = glassMat;
-        }
+        if (glassObj && (glassObj as THREE.Mesh).isMesh) (glassObj as THREE.Mesh).material = glassMat;
 
         const trimObj = carModel.getObjectByName('trim');
-        if (trimObj && (trimObj as THREE.Mesh).isMesh) {
-          (trimObj as THREE.Mesh).material = carbonMat;
-        }
+        if (trimObj && (trimObj as THREE.Mesh).isMesh) (trimObj as THREE.Mesh).material = carbonMat;
 
         ['rim_fl', 'rim_fr', 'rim_rr', 'rim_rl'].forEach(name => {
           const rimObj = carModel.getObjectByName(name);
-          if (rimObj && (rimObj as THREE.Mesh).isMesh) {
-            (rimObj as THREE.Mesh).material = rimMat;
-          }
+          if (rimObj && (rimObj as THREE.Mesh).isMesh) (rimObj as THREE.Mesh).material = rimMat;
         });
 
-        // Store wheels for synchronized rotation
         ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'].forEach(name => {
           const w = carModel.getObjectByName(name);
           if (w) wheelsRef.current.push(w);
         });
 
-        // Contact Ambient Occlusion Ground Shadow on Road
+        // Contact AO shadow
         const shadowTexture = new THREE.TextureLoader().load('/models/supercar_ao.png');
         const shadowPlane = new THREE.Mesh(
           new THREE.PlaneGeometry(2.7, 5.4),
@@ -597,7 +623,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         shadowPlane.renderOrder = 2;
         carRootGroup.add(shadowPlane);
 
-        // Projector High-Beam Headlamps Illuminating the Road Ahead
+        // Headlights
         headlightLightsRef.current = [];
         headlightConesRef.current = [];
 
@@ -612,12 +638,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
           const beamGeo = new THREE.ConeGeometry(0.85, 7.5, 16, 1, true);
           beamGeo.rotateX(Math.PI / 2);
           beamGeo.translate(x, 0.55, 5.8);
-          const beamMat = new THREE.MeshBasicMaterial({
-            color: 0x60a5fa,
-            transparent: true,
-            opacity: 0.16,
-            side: THREE.DoubleSide
-          });
+          const beamMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.16, side: THREE.DoubleSide });
           const coneMesh = new THREE.Mesh(beamGeo, beamMat);
           carRootGroup.add(coneMesh);
           headlightConesRef.current.push(coneMesh);
@@ -630,31 +651,23 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         setModelLoaded(true);
       },
       (xhr) => {
-        if (xhr.total > 0) {
-          setLoadProgress(Math.round((xhr.loaded / xhr.total) * 100));
-        }
+        if (xhr.total > 0) setLoadProgress(Math.round((xhr.loaded / xhr.total) * 100));
       },
       (err) => console.error('Supercar GLTF load error:', err)
     );
 
-    // 9. Interactive Drag to Orbit
+    // Orbit
     const onMouseDown = (e: MouseEvent) => {
       isDraggingRef.current = true;
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
     };
-
     const onMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
       const dx = e.clientX - prevMouseRef.current.x;
-      if (carGroupRef.current) {
-        carGroupRef.current.rotation.y += dx * 0.007;
-      }
+      if (carGroupRef.current) carGroupRef.current.rotation.y += dx * 0.007;
       prevMouseRef.current = { x: e.clientX, y: e.clientY };
     };
-
-    const onMouseUp = () => {
-      isDraggingRef.current = false;
-    };
+    const onMouseUp = () => { isDraggingRef.current = false; };
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
@@ -662,19 +675,13 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
         prevMouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
     };
-
     const onTouchMove = (e: TouchEvent) => {
       if (!isDraggingRef.current || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - prevMouseRef.current.x;
-      if (carGroupRef.current) {
-        carGroupRef.current.rotation.y += dx * 0.009;
-      }
+      if (carGroupRef.current) carGroupRef.current.rotation.y += dx * 0.009;
       prevMouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     };
-
-    const onTouchEnd = () => {
-      isDraggingRef.current = false;
-    };
+    const onTouchEnd = () => { isDraggingRef.current = false; };
 
     const domEl = renderer.domElement;
     domEl.addEventListener('mousedown', onMouseDown);
@@ -694,13 +701,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     };
     window.addEventListener('resize', onResize);
 
-    // 10. 60 FPS Render Loop
     let animId: number;
     let time = 0;
-
     const animate = () => {
       time += 0.016;
-
       currentCamPos.current.lerp(targetCamPos.current, 0.045);
       currentLookAt.current.lerp(targetLookAt.current, 0.045);
 
@@ -723,7 +727,6 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
 
       animId = requestAnimationFrame(animate);
     };
-
     animate();
 
     return () => {
@@ -735,15 +738,12 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('resize', onResize);
-
       renderer.dispose();
-      if (container.contains(domEl)) {
-        container.removeChild(domEl);
-      }
+      if (container.contains(domEl)) container.removeChild(domEl);
     };
-  }, [isRotating]);
+  }, [activeTab, isRotating]);
 
-  // Synchronize Paint Livery
+  // Synchronize Paint
   useEffect(() => {
     if (bodyMaterialRef.current) {
       bodyMaterialRef.current.color.set(selectedFinish.hex);
@@ -757,11 +757,10 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     }
   }, [selectedFinish]);
 
-  // Handle Real Environment Switching
+  // Environment Switcher
   const handleSelectEnvironment = (env: typeof REAL_ENVIRONMENTS[0]) => {
     setSelectedEnv(env);
     if (!sceneRef.current || !pmremRef.current) return;
-
     const pmrem = pmremRef.current;
     new RGBELoader().load(
       env.file,
@@ -784,44 +783,22 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     );
   };
 
-  // Toggle Headlights
   const toggleHeadlights = () => {
     const nextState = !headlightsOn;
     setHeadlightsOn(nextState);
-    headlightLightsRef.current.forEach(l => {
-      l.intensity = nextState ? 6.0 : 0;
-    });
-    headlightConesRef.current.forEach(c => {
-      c.visible = nextState;
-    });
+    headlightLightsRef.current.forEach(l => { l.intensity = nextState ? 6.0 : 0; });
+    headlightConesRef.current.forEach(c => { c.visible = nextState; });
   };
 
-  // Camera Angles
   const setPresetView = (view: 'hero' | 'profile' | 'front' | 'cockpit' | 'rear') => {
     setCameraView(view);
     setActiveHotspot(null);
-
     switch (view) {
-      case 'hero':
-        targetCamPos.current.set(4.5, 1.8, 4.2);
-        targetLookAt.current.set(0, 0.35, 0);
-        break;
-      case 'profile':
-        targetCamPos.current.set(5.8, 1.2, 0);
-        targetLookAt.current.set(0, 0.35, 0);
-        break;
-      case 'front':
-        targetCamPos.current.set(0, 0.9, 4.8);
-        targetLookAt.current.set(0, 0.45, 0);
-        break;
-      case 'cockpit':
-        targetCamPos.current.set(0.65, 1.45, 0.65);
-        targetLookAt.current.set(-0.15, 0.75, 0.05);
-        break;
-      case 'rear':
-        targetCamPos.current.set(0, 1.1, -4.6);
-        targetLookAt.current.set(0, 0.35, 0);
-        break;
+      case 'hero': targetCamPos.current.set(4.5, 1.8, 4.2); targetLookAt.current.set(0, 0.35, 0); break;
+      case 'profile': targetCamPos.current.set(5.8, 1.2, 0); targetLookAt.current.set(0, 0.35, 0); break;
+      case 'front': targetCamPos.current.set(0, 0.9, 4.8); targetLookAt.current.set(0, 0.45, 0); break;
+      case 'cockpit': targetCamPos.current.set(0.65, 1.45, 0.65); targetLookAt.current.set(-0.15, 0.75, 0.05); break;
+      case 'rear': targetCamPos.current.set(0, 1.1, -4.6); targetLookAt.current.set(0, 0.35, 0); break;
     }
   };
 
@@ -838,13 +815,17 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
     setIsRotating(true);
   };
 
+  const handlePrintReference = () => {
+    window.print();
+  };
+
   return (
     <div className="relative w-full min-h-[660px] lg:min-h-[780px] bg-dark-950 border-b border-dark-800 overflow-hidden flex flex-col justify-between select-none">
-      {/* Top Architectural Marque Header */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex items-center justify-between border-b border-white/10 pb-4 backdrop-blur-md bg-dark-950/40 rounded-b-2xl">
-        {/* Left: Latin Brand Axiom */}
+      {/* Top Header: Latin Axiom & Mode Tabs */}
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 border-b border-white/10 backdrop-blur-md bg-dark-950/70 rounded-b-2xl flex flex-col lg:flex-row items-center justify-between gap-4">
+        {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full border border-gold-500/60 flex items-center justify-center text-gold-400 font-heading text-xs font-black shadow-[0_0_20px_rgba(212,175,55,0.3)] bg-dark-950/80">
+          <div className="w-10 h-10 rounded-full border border-gold-500/60 flex items-center justify-center text-gold-400 font-heading text-xs font-black shadow-[0_0_20px_rgba(212,175,55,0.3)] bg-dark-950/80">
             JKD
           </div>
           <div>
@@ -852,13 +833,68 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
               "NULLA TENACI INVIA EST VIA"
             </span>
             <span className="text-[9px] tracking-[0.16em] uppercase text-dark-300 font-mono">
-              For The Tenacious, No Road Is Impassable • Est. Accra 2026
+              The Marque Atelier & Automotive Technical Reference • Est. Accra 2026
             </span>
           </div>
         </div>
 
-        {/* Right: Audio Ambience & Controls */}
-        <div className="flex items-center gap-3">
+        {/* Center: Major Studio & Reference Sheet Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-dark-900/90 rounded-2xl border border-gold-500/30 backdrop-blur-md shadow-xl">
+          <button
+            type="button"
+            onClick={() => setActiveTab('3d-studio')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+              activeTab === '3d-studio'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-dark-300 hover:text-white hover:bg-dark-800'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span>3D Real Studio</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('blueprint')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+              activeTab === 'blueprint'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-dark-300 hover:text-white hover:bg-dark-800'
+            }`}
+          >
+            <Ruler className="w-3.5 h-3.5" />
+            <span>Engineering Blueprint</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('powertrain')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+              activeTab === 'powertrain'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-dark-300 hover:text-white hover:bg-dark-800'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            <span>Powertrain X-Ray</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('homologation')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 transition-all ${
+              activeTab === 'homologation'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-dark-300 hover:text-white hover:bg-dark-800'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Homologation Dossier</span>
+          </button>
+        </div>
+
+        {/* Right: Sound & Action Controls */}
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={toggleAudio}
@@ -869,20 +905,7 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
             }`}
           >
             {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-gold-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">V8 Audio: {isAudioActive ? 'Active' : 'Muted'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={toggleHeadlights}
-            className={`px-3 py-1.5 rounded-full border text-[10px] tracking-wider uppercase font-semibold flex items-center gap-1.5 transition-colors ${
-              headlightsOn 
-                ? 'bg-blue-500/30 border-blue-400 text-blue-200 shadow-[0_0_15px_rgba(96,165,250,0.3)]' 
-                : 'bg-dark-950/80 border-dark-700 text-dark-300 hover:text-white'
-            }`}
-          >
-            <Lightbulb className="w-3 h-3 text-blue-400" />
-            <span className="hidden md:inline">LED Headlamps</span>
+            <span className="hidden sm:inline">Engine: {isAudioActive ? 'Active' : 'Muted'}</span>
           </button>
 
           <button
@@ -891,191 +914,605 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-dark-950/80 border border-gold-500/40 text-gold-400 text-[10px] tracking-wider uppercase font-semibold hover:bg-gold-500/10 transition-colors"
           >
             <Eye className="w-3 h-3 text-gold-400" />
-            <span>Official Atelier Flyer</span>
+            <span>Brand Flyer</span>
           </button>
         </div>
       </div>
 
-      {/* Center 3D WebGL Canvas Viewport with 360° Real Environment */}
-      <div className="relative flex-1 w-full flex items-center justify-center my-1">
-        <div
-          ref={mountRef}
-          className="w-full h-[520px] sm:h-[600px] lg:h-[680px] cursor-grab active:cursor-grabbing"
-        />
+      {/* TAB 1: 3D REAL STUDIO VIEWPORT */}
+      {activeTab === '3d-studio' && (
+        <div className="relative flex-1 w-full flex items-center justify-center my-1">
+          <div
+            ref={mountRef}
+            className="w-full h-[520px] sm:h-[600px] lg:h-[680px] cursor-grab active:cursor-grabbing"
+          />
 
-        {/* Loading Spinner */}
-        {!modelLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-950/90 backdrop-blur-md z-30 space-y-3">
-            <div className="w-12 h-12 rounded-full border-2 border-gold-500/20 border-t-gold-400 animate-spin" />
-            <span className="text-xs font-mono tracking-widest text-gold-400 uppercase">
-              Loading 360° Real Surrounding & Geometry... {loadProgress > 0 && `${loadProgress}%`}
-            </span>
+          {/* Loading */}
+          {!modelLoaded && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-950/90 backdrop-blur-md z-30 space-y-3">
+              <div className="w-12 h-12 rounded-full border-2 border-gold-500/20 border-t-gold-400 animate-spin" />
+              <span className="text-xs font-mono tracking-widest text-gold-400 uppercase">
+                Loading 360° Real Surrounding & Geometry... {loadProgress > 0 && `${loadProgress}%`}
+              </span>
+            </div>
+          )}
+
+          {/* Top Left: Environment Selector */}
+          <div className="absolute top-4 left-4 sm:left-8 z-10 space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dark-950/85 border border-gold-500/40 text-gold-400 backdrop-blur-md font-mono text-[10px]">
+              <Globe2 className="w-3.5 h-3.5 text-gold-400" />
+              <span className="font-bold tracking-wider">360° SURROUNDING:</span>
+              <span className="text-white uppercase font-semibold">{selectedEnv.name}</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
+              {REAL_ENVIRONMENTS.map(env => {
+                const Icon = env.icon;
+                return (
+                  <button
+                    key={env.id}
+                    type="button"
+                    onClick={() => handleSelectEnvironment(env)}
+                    title={env.description}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all ${
+                      selectedEnv.id === env.id
+                        ? 'bg-gold-500 text-dark-950 shadow-md'
+                        : 'text-dark-300 hover:text-white hover:bg-dark-800'
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    <span className="hidden sm:inline">{env.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        )}
 
-        {/* Top Left: Real Environment Selector Pills */}
-        <div className="absolute top-4 left-4 sm:left-8 z-10 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dark-950/85 border border-gold-500/40 text-gold-400 backdrop-blur-md font-mono text-[10px]">
-            <Globe2 className="w-3.5 h-3.5 text-gold-400" />
-            <span className="font-bold tracking-wider">360° REAL SURROUNDING:</span>
-            <span className="text-white uppercase font-semibold">{selectedEnv.name}</span>
-          </div>
-
-          <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
-            {REAL_ENVIRONMENTS.map(env => {
-              const Icon = env.icon;
-              return (
+          {/* Top Right: Camera Angles & Headlights */}
+          <div className="absolute top-4 right-4 sm:right-8 z-10 flex flex-col items-end gap-2">
+            <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
+              {[
+                { id: 'hero', label: '3/4 Hero' },
+                { id: 'profile', label: 'Profile' },
+                { id: 'front', label: 'Front' },
+                { id: 'cockpit', label: 'Cockpit' },
+                { id: 'rear', label: 'Rear' }
+              ].map(v => (
                 <button
-                  key={env.id}
+                  key={v.id}
                   type="button"
-                  onClick={() => handleSelectEnvironment(env)}
-                  title={env.description}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all ${
-                    selectedEnv.id === env.id
-                      ? 'bg-gold-500 text-dark-950 shadow-md'
+                  onClick={() => setPresetView(v.id as any)}
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all ${
+                    cameraView === v.id
+                      ? 'bg-gold-500 text-dark-950 font-bold shadow-md'
                       : 'text-dark-300 hover:text-white hover:bg-dark-800'
                   }`}
                 >
-                  <Icon className="w-3 h-3" />
-                  <span className="hidden sm:inline">{env.name}</span>
+                  {v.label}
                 </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Top Right: Camera Presets */}
-        <div className="absolute top-4 right-4 sm:right-8 z-10 flex flex-col items-end gap-1.5">
-          <span className="text-[9px] uppercase tracking-[0.2em] text-white font-mono drop-shadow">
-            Observation Angle
-          </span>
-          <div className="flex items-center gap-1 bg-dark-950/85 p-1 rounded-xl border border-dark-700/80 backdrop-blur-md">
-            {[
-              { id: 'hero', label: '3/4 Hero' },
-              { id: 'profile', label: 'Profile' },
-              { id: 'front', label: 'Front' },
-              { id: 'cockpit', label: 'Cockpit' },
-              { id: 'rear', label: 'Rear' }
-            ].map(v => (
+              ))}
               <button
-                key={v.id}
                 type="button"
-                onClick={() => setPresetView(v.id as any)}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all ${
-                  cameraView === v.id
-                    ? 'bg-gold-500 text-dark-950 font-bold shadow-md'
-                    : 'text-dark-300 hover:text-white hover:bg-dark-800'
+                onClick={() => setIsRotating(!isRotating)}
+                title="Toggle Auto Rotation"
+                className={`p-1 rounded-lg border text-[10px] ${
+                  isRotating ? 'bg-gold-500/20 border-gold-500/50 text-gold-400' : 'bg-dark-800 border-dark-700 text-dark-400'
                 }`}
               >
-                {v.label}
+                <RotateCcw className="w-3.5 h-3.5" />
               </button>
-            ))}
+            </div>
+
             <button
               type="button"
-              onClick={() => setIsRotating(!isRotating)}
-              title="Toggle Auto Rotation"
-              className={`p-1 rounded-lg border text-[10px] ${
-                isRotating ? 'bg-gold-500/20 border-gold-500/50 text-gold-400' : 'bg-dark-800 border-dark-700 text-dark-400'
+              onClick={toggleHeadlights}
+              className={`px-3 py-1 rounded-full border text-[10px] font-mono tracking-wider uppercase font-semibold flex items-center gap-1.5 transition-colors backdrop-blur-md ${
+                headlightsOn 
+                  ? 'bg-blue-500/30 border-blue-400 text-blue-200 shadow-[0_0_15px_rgba(96,165,250,0.3)]' 
+                  : 'bg-dark-950/80 border-dark-700 text-dark-300 hover:text-white'
               }`}
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <Lightbulb className="w-3 h-3 text-blue-400" />
+              <span>Projector LED Rays</span>
             </button>
           </div>
-        </div>
 
-        {/* Floating Numbered Hotspot Pins */}
-        {modelLoaded && (
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="relative w-full max-w-4xl h-full">
-              {HOTSPOTS.map((spot, i) => (
-                <button
-                  key={spot.id}
-                  type="button"
-                  onClick={() => handleSelectHotspot(spot)}
-                  className="pointer-events-auto absolute transform -translate-x-1/2 -translate-y-1/2 group"
-                  style={{
-                    left: `${20 + i * 15}%`,
-                    top: `${42 + (i % 2 === 0 ? -12 : 12)}%`
-                  }}
-                >
-                  <div className="relative flex items-center justify-center">
-                    <span className="absolute w-8 h-8 rounded-full bg-gold-400/30 animate-ping" />
-                    <span className="w-6 h-6 rounded-full bg-dark-950 border-2 border-gold-400 flex items-center justify-center text-[10px] font-black text-gold-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] group-hover:scale-125 transition-transform">
-                      {i + 1}
-                    </span>
-                    <div className="absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap hidden group-hover:block px-3 py-1.5 rounded-lg bg-dark-950/95 border border-gold-500/50 text-[10px] font-mono text-gold-300 backdrop-blur-md shadow-2xl">
-                      {spot.name}
+          {/* Hotspots */}
+          {modelLoaded && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="relative w-full max-w-4xl h-full">
+                {HOTSPOTS.map((spot, i) => (
+                  <button
+                    key={spot.id}
+                    type="button"
+                    onClick={() => handleSelectHotspot(spot)}
+                    className="pointer-events-auto absolute transform -translate-x-1/2 -translate-y-1/2 group"
+                    style={{
+                      left: `${20 + i * 15}%`,
+                      top: `${42 + (i % 2 === 0 ? -12 : 12)}%`
+                    }}
+                  >
+                    <div className="relative flex items-center justify-center">
+                      <span className="absolute w-8 h-8 rounded-full bg-gold-400/30 animate-ping" />
+                      <span className="w-6 h-6 rounded-full bg-dark-950 border-2 border-gold-400 flex items-center justify-center text-[10px] font-black text-gold-400 shadow-[0_0_20px_rgba(250,204,21,0.8)] group-hover:scale-125 transition-transform">
+                        {i + 1}
+                      </span>
+                      <div className="absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap hidden group-hover:block px-3 py-1.5 rounded-lg bg-dark-950/95 border border-gold-500/50 text-[10px] font-mono text-gold-300 backdrop-blur-md shadow-2xl">
+                        {spot.name}
+                      </div>
                     </div>
-                  </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Specification Drawer */}
+          {activeHotspot && (
+            <div className="absolute bottom-20 left-4 sm:left-8 right-4 sm:right-auto sm:max-w-md z-30 p-6 rounded-3xl bg-dark-950/95 border border-gold-500/60 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="flex items-start justify-between gap-3 border-b border-dark-800 pb-3 mb-3">
+                <div>
+                  <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-gold-400 block font-bold">
+                    Bespoke Craftsmanship Spec
+                  </span>
+                  <h4 className="font-heading text-lg font-bold text-white tracking-tight">
+                    {activeHotspot.name}
+                  </h4>
+                  <p className="text-xs text-gold-400/80 font-medium">{activeHotspot.subtitle}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseHotspot}
+                  className="text-dark-400 hover:text-white p-1.5 rounded-lg bg-dark-900 border border-dark-700"
+                >
+                  ✕
                 </button>
-              ))}
+              </div>
+
+              <p className="text-xs text-dark-300 leading-relaxed mb-4">
+                {activeHotspot.desc}
+              </p>
+
+              <div className="grid grid-cols-1 gap-2 border-t border-dark-800/80 pt-3">
+                {activeHotspot.specs.map((s, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-dark-400 text-[11px]">{s.label}:</span>
+                    <span className="text-white font-semibold">{s.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-dark-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => onNavigatePage('inventory')}
+                  className="text-gold-400 hover:text-gold-300 text-xs font-bold flex items-center gap-1.5"
+                >
+                  <span>View Sourced Inventory</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCloseHotspot}
+                  className="text-[11px] text-dark-400 hover:text-white"
+                >
+                  Return to Studio
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Drag instruction */}
+          <div className="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-10">
+            <div className="px-4 py-1.5 rounded-full bg-dark-950/85 border border-dark-700/80 text-[11px] text-white backdrop-blur-md flex items-center gap-2 shadow-2xl">
+              <Compass className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
+              <span>Orbit 360° to explore real surroundings • Click numbered beacons to zoom components</span>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Active Hotspot Specification Drawer */}
-        {activeHotspot && (
-          <div className="absolute bottom-20 left-4 sm:left-8 right-4 sm:right-auto sm:max-w-md z-30 p-6 rounded-3xl bg-dark-950/95 border border-gold-500/60 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="flex items-start justify-between gap-3 border-b border-dark-800 pb-3 mb-3">
+      {/* TAB 2: TECHNICAL BLUEPRINT REFERENCE SHEET */}
+      {activeTab === 'blueprint' && (
+        <div className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+          {/* Blueprint Header */}
+          <div className="p-6 rounded-3xl bg-[#07101b] border-2 border-cyan-500/40 shadow-2xl space-y-6 relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.1),transparent_50%)]">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-cyan-500/20 pb-4">
               <div>
-                <span className="text-[9px] font-mono tracking-[0.2em] uppercase text-gold-400 block font-bold">
-                  Bespoke Craftsmanship Spec
-                </span>
-                <h4 className="font-heading text-lg font-bold text-white tracking-tight">
-                  {activeHotspot.name}
-                </h4>
-                <p className="text-xs text-gold-400/80 font-medium">{activeHotspot.subtitle}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseHotspot}
-                className="text-dark-400 hover:text-white p-1.5 rounded-lg bg-dark-900 border border-dark-700"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-dark-300 leading-relaxed mb-4">
-              {activeHotspot.desc}
-            </p>
-
-            <div className="grid grid-cols-1 gap-2 border-t border-dark-800/80 pt-3">
-              {activeHotspot.specs.map((s, idx) => (
-                <div key={idx} className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-dark-400 text-[11px]">{s.label}:</span>
-                  <span className="text-white font-semibold">{s.value}</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+                  <Ruler className="w-3.5 h-3.5" />
+                  <span>CAD Homologation Blueprint Reference Sheet</span>
                 </div>
-              ))}
+                <h3 className="font-heading text-2xl sm:text-3xl font-black text-white">
+                  {selectedReferenceCar.name}
+                </h3>
+                <p className="text-cyan-400 text-xs font-mono mt-0.5">
+                  Specification Class: {selectedReferenceCar.class} • Chassis Clearance Code: JKD-REF-458
+                </p>
+              </div>
+
+              {/* Units & Actions */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 bg-dark-900 p-1 rounded-xl border border-cyan-500/30">
+                  <button
+                    type="button"
+                    onClick={() => setUnitSystem('metric')}
+                    className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                      unitSystem === 'metric' ? 'bg-cyan-500 text-dark-950 shadow' : 'text-dark-300 hover:text-white'
+                    }`}
+                  >
+                    METRIC (mm)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUnitSystem('imperial')}
+                    className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                      unitSystem === 'imperial' ? 'bg-cyan-500 text-dark-950 shadow' : 'text-dark-300 hover:text-white'
+                    }`}
+                  >
+                    IMPERIAL (in)
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePrintReference}
+                  className="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Blueprint</span>
+                </button>
+              </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-dark-800 flex items-center justify-between">
+            {/* 4-View Orthographic Blueprint Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 font-mono">
+              {/* View 1: Side Profile Elevation */}
+              <div className="p-5 rounded-2xl bg-dark-950/80 border border-cyan-500/30 space-y-3 relative group">
+                <div className="flex items-center justify-between text-xs text-cyan-400 border-b border-dark-800 pb-2">
+                  <span className="font-bold">01 / SIDE PROFILE ELEVATION</span>
+                  <span>SCALE 1:25</span>
+                </div>
+                
+                {/* Vector Silhouette Simulation */}
+                <div className="h-44 rounded-xl bg-[#040810] border border-cyan-500/20 flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.06),transparent)]">
+                  {/* Caliper lines */}
+                  <div className="absolute inset-x-8 top-4 flex items-center justify-between text-[10px] text-cyan-400 border-b border-dashed border-cyan-500/40 pb-1">
+                    <span>OVERALL LENGTH</span>
+                    <span className="font-bold text-white">
+                      {unitSystem === 'metric' ? `${selectedReferenceCar.length} mm` : `${(selectedReferenceCar.length / 25.4).toFixed(1)} in`}
+                    </span>
+                  </div>
+
+                  {/* Car SVG Profile */}
+                  <svg className="w-full max-w-sm h-24 stroke-cyan-400 fill-cyan-500/10" viewBox="0 0 400 120">
+                    <path d="M 30,85 L 70,85 C 75,70 95,70 100,85 L 290,85 C 295,70 315,70 320,85 L 375,85 C 385,85 390,75 385,60 C 375,45 340,40 310,38 C 270,36 240,20 180,20 C 130,20 100,38 70,45 C 40,52 25,65 25,75 Z" strokeWidth="2" strokeDasharray="none" />
+                    {/* Wheels */}
+                    <circle cx="85" cy="85" r="16" stroke="currentColor" strokeWidth="2" fill="#07101b" />
+                    <circle cx="85" cy="85" r="8" stroke="#e8be5b" strokeWidth="1.5" fill="none" />
+                    <circle cx="305" cy="85" r="16" stroke="currentColor" strokeWidth="2" fill="#07101b" />
+                    <circle cx="305" cy="85" r="8" stroke="#e8be5b" strokeWidth="1.5" fill="none" />
+                    {/* Cockpit Canopy */}
+                    <path d="M 125,40 C 145,26 175,24 220,24 C 255,24 275,32 290,40 Z" strokeWidth="1.5" fill="rgba(56,189,248,0.2)" />
+                  </svg>
+
+                  {/* Wheelbase Dimension */}
+                  <div className="absolute inset-x-20 bottom-3 flex items-center justify-between text-[10px] text-gold-400 border-t border-dashed border-gold-500/40 pt-0.5">
+                    <span>WHEELBASE</span>
+                    <span className="font-bold text-white">
+                      {unitSystem === 'metric' ? `${selectedReferenceCar.wheelbase} mm` : `${(selectedReferenceCar.wheelbase / 25.4).toFixed(1)} in`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-[11px] pt-1">
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">HEIGHT:</span>
+                    <strong className="text-white">{unitSystem === 'metric' ? `${selectedReferenceCar.height} mm` : `${(selectedReferenceCar.height / 25.4).toFixed(1)} in`}</strong>
+                  </div>
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">GROUND CLEARANCE:</span>
+                    <strong className="text-white">110 mm (4.3 in)</strong>
+                  </div>
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">DRAG COEFFICIENT:</span>
+                    <strong className="text-cyan-400">0.32 Cd</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* View 2: Front & Rear Elevation */}
+              <div className="p-5 rounded-2xl bg-dark-950/80 border border-cyan-500/30 space-y-3 relative group">
+                <div className="flex items-center justify-between text-xs text-cyan-400 border-b border-dark-800 pb-2">
+                  <span className="font-bold">02 / FRONT & REAR AERODYNAMIC ELEVATION</span>
+                  <span>WIDTH: {unitSystem === 'metric' ? `${selectedReferenceCar.width} mm` : `${(selectedReferenceCar.width / 25.4).toFixed(1)} in`}</span>
+                </div>
+
+                <div className="h-44 rounded-xl bg-[#040810] border border-cyan-500/20 flex items-center justify-around p-4 relative overflow-hidden">
+                  {/* Front View SVG */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-[9px] text-dark-400 mb-1">FRONT FASCIA</span>
+                    <svg className="w-36 h-24 stroke-cyan-400 fill-cyan-500/10" viewBox="0 0 160 100">
+                      <path d="M 20,70 L 30,70 L 35,45 L 50,30 L 110,30 L 125,45 L 130,70 L 140,70 L 135,78 L 25,78 Z" strokeWidth="2" />
+                      {/* Headlights */}
+                      <polygon points="38,48 52,44 48,52" fill="#60a5fa" stroke="none" />
+                      <polygon points="122,48 108,44 112,52" fill="#60a5fa" stroke="none" />
+                      {/* Radiator Grille */}
+                      <rect x="55" y="62" width="50" height="12" stroke="#e8be5b" strokeWidth="1" fill="none" />
+                      {/* Tyres */}
+                      <rect x="18" y="55" width="12" height="25" fill="#11161d" stroke="currentColor" strokeWidth="1" />
+                      <rect x="130" y="55" width="12" height="25" fill="#11161d" stroke="currentColor" strokeWidth="1" />
+                    </svg>
+                  </div>
+
+                  <div className="h-28 w-px bg-dark-800" />
+
+                  {/* Rear View SVG */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-[9px] text-dark-400 mb-1">REAR DIFFUSER</span>
+                    <svg className="w-36 h-24 stroke-cyan-400 fill-cyan-500/10" viewBox="0 0 160 100">
+                      <path d="M 20,70 L 35,48 L 50,32 L 110,32 L 125,48 L 140,70 L 135,78 L 25,78 Z" strokeWidth="2" />
+                      {/* Tailpipes */}
+                      <circle cx="70" cy="72" r="3.5" fill="#e8be5b" stroke="none" />
+                      <circle cx="80" cy="72" r="3.5" fill="#e8be5b" stroke="none" />
+                      <circle cx="90" cy="72" r="3.5" fill="#e8be5b" stroke="none" />
+                      {/* Diffuser fins */}
+                      <line x1="50" y1="72" x2="50" y2="78" strokeWidth="1.5" stroke="#38bdf8" />
+                      <line x1="60" y1="72" x2="60" y2="78" strokeWidth="1.5" stroke="#38bdf8" />
+                      <line x1="100" y1="72" x2="100" y2="78" strokeWidth="1.5" stroke="#38bdf8" />
+                      <line x1="110" y1="72" x2="110" y2="78" strokeWidth="1.5" stroke="#38bdf8" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-[11px] pt-1">
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">FRONT TRACK:</span>
+                    <strong className="text-white">1,668 mm (65.7 in)</strong>
+                  </div>
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">REAR TRACK:</span>
+                    <strong className="text-white">1,642 mm (64.6 in)</strong>
+                  </div>
+                  <div>
+                    <span className="text-dark-400 block text-[9px]">WEIGHT BIAS:</span>
+                    <strong className="text-cyan-400">43% F / 57% R</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Model Switcher Footer */}
+            <div className="pt-4 border-t border-cyan-500/20 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono text-dark-300">Compare Reference Car:</span>
+                <div className="flex items-center gap-1.5">
+                  {REFERENCE_CARS.map(rc => (
+                    <button
+                      key={rc.id}
+                      type="button"
+                      onClick={() => setSelectedReferenceCar(rc)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                        selectedReferenceCar.id === rc.id
+                          ? 'bg-cyan-500 text-dark-950 shadow-md'
+                          : 'bg-dark-900 text-dark-300 border border-dark-700 hover:text-white'
+                      }`}
+                    >
+                      {rc.name.split('/')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => onNavigatePage('inventory')}
-                className="text-gold-400 hover:text-gold-300 text-xs font-bold flex items-center gap-1.5"
+                onClick={() => setActiveTab('3d-studio')}
+                className="px-4 py-2 rounded-xl bg-gold-500 text-dark-950 font-bold text-xs font-mono flex items-center gap-1.5 shadow-lg"
               >
-                <span>View Sourced Inventory</span>
+                <span>Return to 3D Turntable</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: POWERTRAIN & CHASSIS X-RAY */}
+      {activeTab === 'powertrain' && (
+        <div className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+          <div className="p-8 rounded-3xl bg-[#090d16] border-2 border-gold-500/40 shadow-2xl space-y-6">
+            <div className="border-b border-dark-800 pb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+                <Cpu className="w-3.5 h-3.5" />
+                <span>Mechanical & Propulsion Architecture</span>
+              </div>
+              <h3 className="font-heading text-2xl sm:text-3xl font-black text-white">
+                Mid-Engine 90° V8 Propulsion Architecture
+              </h3>
+              <p className="text-dark-300 text-xs sm:text-sm font-mono mt-1">
+                Naturally aspirated & twin-turbo configurations engineered for high-rpm endurance and responsive throttle mapping.
+              </p>
+            </div>
+
+            {/* Powertrain Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+              <div className="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-3">
+                <div className="flex items-center gap-2 text-gold-400 font-bold">
+                  <Zap className="w-4 h-4" />
+                  <span>OUTPUT & DYNO LOG</span>
+                </div>
+                <div className="space-y-2 text-dark-300">
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Peak Power:</span>
+                    <strong className="text-white">{selectedReferenceCar.power}</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Peak Torque:</span>
+                    <strong className="text-white">{selectedReferenceCar.torque}</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>0–100 km/h:</span>
+                    <strong className="text-gold-400">{selectedReferenceCar.acceleration}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Top Speed:</span>
+                    <strong className="text-white">{selectedReferenceCar.topSpeed}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-3">
+                <div className="flex items-center gap-2 text-blue-400 font-bold">
+                  <Activity className="w-4 h-4" />
+                  <span>TRANSAXLE & GEARBOX</span>
+                </div>
+                <div className="space-y-2 text-dark-300">
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Transmission:</span>
+                    <strong className="text-white">7-Speed Dual-Clutch</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Differential:</span>
+                    <strong className="text-white">Electronic E-Diff3</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Shift Speed:</span>
+                    <strong className="text-blue-400">40 milliseconds</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Clutch Type:</span>
+                    <strong className="text-white">Wet Multi-Plate</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-950 border border-dark-800 space-y-3">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>CHASSIS & BRAKING</span>
+                </div>
+                <div className="space-y-2 text-dark-300">
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Brembo Rotors:</span>
+                    <strong className="text-white">398 mm Carbon Ceramic</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Calipers:</span>
+                    <strong className="text-white">6-Piston Monoblock</strong>
+                  </div>
+                  <div className="flex justify-between border-b border-dark-900 pb-1.5">
+                    <span>Dampers:</span>
+                    <strong className="text-emerald-400">Magnetorheological</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Suspension:</span>
+                    <strong className="text-white">Double Wishbone Pushrod</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-dark-800 flex items-center justify-between">
+              <span className="text-xs text-dark-400 font-mono">
+                Homologated for West African fuel ratings (Octane 95+ certified).
+              </span>
               <button
                 type="button"
-                onClick={handleCloseHotspot}
-                className="text-[11px] text-dark-400 hover:text-white"
+                onClick={() => setActiveTab('3d-studio')}
+                className="px-4 py-2 rounded-xl bg-gold-500 text-dark-950 font-bold text-xs font-mono"
               >
-                Return to Studio
+                Back to 3D Visualizer
               </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Center Lower Drag Instruction */}
-        <div className="absolute bottom-4 inset-x-0 flex justify-center pointer-events-none z-10">
-          <div className="px-4 py-1.5 rounded-full bg-dark-950/85 border border-dark-700/80 text-[11px] text-white backdrop-blur-md flex items-center gap-2 shadow-2xl">
-            <Compass className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
-            <span>Orbit 360° to explore real surroundings • Click numbered beacons to zoom components</span>
+      {/* TAB 4: HOMOLOGATION SPECIFICATION DOSSIER */}
+      {activeTab === 'homologation' && (
+        <div className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
+          <div className="p-8 rounded-3xl bg-dark-950 border-2 border-gold-500/40 shadow-2xl space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-dark-800 pb-4">
+              <div>
+                <span className="text-[10px] font-mono tracking-widest uppercase text-gold-400 block font-bold">
+                  Official Trade & Import Ledger
+                </span>
+                <h3 className="font-heading text-2xl sm:text-3xl font-black text-white">
+                  Homologation Technical Dossier
+                </h3>
+              </div>
+              <a
+                href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent('Hello Jackdan, I am reviewing your official Homologation Reference Sheet and would like to request vehicle allocation.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 rounded-xl gold-gradient-btn text-dark-950 font-bold text-xs font-mono flex items-center gap-1.5 shadow"
+              >
+                <span>Request Allocation on WhatsApp</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* Comprehensive Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-mono text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-dark-800 text-gold-400 text-[11px]">
+                    <th className="py-3 px-4">PARAMETER</th>
+                    <th className="py-3 px-4">FACTORY SPECIFICATION</th>
+                    <th className="py-3 px-4">GHANA CUSTOMS & GRA STANDARD</th>
+                    <th className="py-3 px-4">VERIFICATION METHOD</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-dark-900 text-dark-300">
+                  <tr>
+                    <td className="py-3 px-4 font-bold text-white">Vehicle Model</td>
+                    <td className="py-3 px-4">{selectedReferenceCar.name}</td>
+                    <td className="py-3 px-4">HS Code: {selectedReferenceCar.hsCode}</td>
+                    <td className="py-3 px-4 text-emerald-400">Title & VIN Match</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-bold text-white">Engine Output</td>
+                    <td className="py-3 px-4">{selectedReferenceCar.power}</td>
+                    <td className="py-3 px-4">Exceeds 3,000 cc Duty Class</td>
+                    <td className="py-3 px-4 text-emerald-400">Dyno Logged</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-bold text-white">Dry Curb Weight</td>
+                    <td className="py-3 px-4">{selectedReferenceCar.weight} kg ({Math.round(selectedReferenceCar.weight * 2.20462)} lbs)</td>
+                    <td className="py-3 px-4">Tema Port Weighbridge Validated</td>
+                    <td className="py-3 px-4 text-emerald-400">Scale Certified</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-bold text-white">Emission Compliance</td>
+                    <td className="py-3 px-4">Euro 6 / EPA Tier-3</td>
+                    <td className="py-3 px-4">DVLA Roadworthy Verified</td>
+                    <td className="py-3 px-4 text-emerald-400">Gas Analyzer Certified</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-bold text-white">Clearing Procedure</td>
+                    <td className="py-3 px-4">RoRo or 40HC Container Sealed</td>
+                    <td className="py-3 px-4">ICUMS Electronic Broker Stamp</td>
+                    <td className="py-3 px-4 text-emerald-400">Zero Demurrage Guaranteed</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="pt-4 border-t border-dark-800 flex items-center justify-between">
+              <span className="text-xs text-dark-400 font-mono">
+                Official Document ID: JKD-TECH-HOMOLOGATION-2026-GH
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveTab('3d-studio')}
+                className="px-4 py-2 rounded-xl bg-dark-900 border border-dark-700 text-white font-bold text-xs font-mono hover:bg-dark-800"
+              >
+                Return to 3D Turntable
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Aircraft Control Deck & Color Palette */}
       <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 border-t border-white/10 bg-dark-950/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-6 rounded-t-2xl">
