@@ -35,8 +35,7 @@ import {
   Hotel
 } from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES, VEHICLES, SPARE_PARTS } from '../data/inventory';
-import { HeroCanvasBackground } from './HeroCanvasBackground';
-import { HeroWebGLShowcase } from './HeroWebGLShowcase';
+import { AutoImportJourney } from './AutoImportJourney';
 
 interface InformationalHomeProps {
   onNavigatePage: (page: string) => void;
@@ -148,110 +147,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
 
   return (
     <div className="space-y-24 pb-20">
-      {/* 1. HERO SECTION - Ultra-Modern Luxury Design with WebGL & Canvas */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950 border-b border-dark-800">
-        {/* Interactive WebGL / Canvas Particle & Constellation Background */}
-        <HeroCanvasBackground />
-
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-gold-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-10 right-10 w-[450px] h-[450px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Brand Story & Welcoming Intro (7 cols) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-400 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
-                <Sparkles className="w-4 h-4 text-gold-400" />
-                <span>Licensed Automobile Importer • Port of Tema Customs Broker</span>
-              </div>
-
-              {/* Main Headline */}
-              <div className="space-y-2">
-                <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                  JACKDAN <span className="gold-gradient-text">PREMIUM</span> VENTURES
-                </h1>
-                <p className="text-gold-400 font-heading text-lg sm:text-xl font-bold tracking-wide uppercase">
-                  "YOUR TRUSTED AUTO IMPORT AND EXPORT PARTNER"
-                </p>
-              </div>
-
-              {/* Informational Summary */}
-              <p className="text-dark-200 text-base sm:text-lg leading-relaxed">
-                Ghana's premier gateway for international automobile importation, genuine OEM spare parts, commercial logistics via <strong>Twumaasco Logistics</strong>, and worldwide travel consultancy via <strong>Jackdan Travel & Tour</strong>.
-              </p>
-
-              {/* Physical Office Badge */}
-              <div className="p-3.5 rounded-2xl bg-dark-900/90 border border-gold-500/30 flex items-start gap-3 backdrop-blur-md">
-                <MapPin className="w-5 h-5 text-gold-400 flex-shrink-0 mt-0.5" />
-                <div className="text-xs text-dark-300">
-                  <strong className="text-white block font-semibold">Head Office Location:</strong>
-                  <span>{CONTACT_INFO.address}</span>
-                </div>
-              </div>
-
-              {/* Key Highlights Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-dark-200">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
-                  <span>Direct USA, UAE, Canada & Europe Sourcing</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-dark-200">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
-                  <span>100% Genuine OEM Auto Spare Parts</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-dark-200">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
-                  <span>Hassle-Free ICUMS Customs Duty Clearing</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-dark-200">
-                  <CheckCircle2 className="w-4 h-4 text-gold-400 flex-shrink-0" />
-                  <span>Dedicated Logistics & Travel Sister Ventures</span>
-                </div>
-              </div>
-
-              {/* Primary Call-to-Actions */}
-              <div className="pt-3 flex flex-wrap items-center gap-3.5">
-                <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="gold-gradient-btn py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xl"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Chat with Us on WhatsApp</span>
-                </a>
-
-                <a
-                  href={`tel:${CONTACT_INFO.primaryPhoneFormatted}`}
-                  className="py-3.5 px-5 rounded-xl bg-dark-800 hover:bg-dark-700 border border-dark-600 hover:border-gold-500/40 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all"
-                >
-                  <PhoneCall className="w-4 h-4 text-gold-400" />
-                  <span>Call {CONTACT_INFO.phones[0]}</span>
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => onNavigatePage('inventory')}
-                  className="py-3.5 px-5 rounded-xl text-gold-400 hover:text-white bg-dark-900 hover:bg-dark-800 border border-dark-700 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all"
-                >
-                  <span>Browse Available Cars</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Right Column: Interactive 3D WebGL Showcase (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center w-full">
-              <HeroWebGLShowcase
-                onEnlargeFlyer={() => setActiveFlyerModal(flyers[0])}
-                onNavigateInventory={() => onNavigatePage('inventory')}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      <AutoImportJourney onNavigatePage={onNavigatePage} />
 
       {/* 2. KEY STATS & CREDIBILITY BAR */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
