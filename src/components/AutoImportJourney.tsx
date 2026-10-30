@@ -121,7 +121,9 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
       const stage = progress*3;
       const reveal = THREE.MathUtils.smoothstep(stage-0.78, 0.05, 0.52);
       const ship = THREE.MathUtils.smoothstep(stage-1.8, 0.12, 0.85);
-      car.visible = true;
+      // The production storefront uses the actual Camry photography in the visual layer.
+      // Keep the procedural placeholder out of view; the 3D freight scene remains behind it.
+      car.visible = false;
       parts.visible = reveal > .04 && ship < .65;
       container.visible = ship > .03;
       car.position.set(0, .1 + Math.sin(performance.now()*.0007)*.025, -ship*.48);
@@ -152,6 +154,11 @@ export const AutoImportJourney: React.FC<Props> = ({ onNavigatePage }) => {
   return <section ref={sectionRef} className="auto-journey" aria-label="Discover Jackdan auto imports and parts">
     <div className="auto-journey__pin"><div ref={mountRef} className="auto-journey__canvas" aria-hidden="true" />
       <div className="auto-journey__glow" aria-hidden="true" />
+      <div className={`auto-journey__vehicle auto-journey__vehicle--${chapter}`} aria-hidden="true">
+        <img src="/assets/cars/toyota-camry.jpg" alt="" />
+        {chapter === 1 && <div className="auto-journey__callouts"><span className="auto-journey__callout auto-journey__callout--wheel"><i/>Alloy wheels</span><span className="auto-journey__callout auto-journey__callout--front"><i/>Headlamps & body parts</span><span className="auto-journey__callout auto-journey__callout--engine"><i/>Engine & genuine OEM parts</span></div>}
+        {chapter === 2 && <div className="auto-journey__container-lines"><span/><span/><span/><span/><span/><span/><span/><span/></div>}
+      </div>
       <div className="auto-journey__header"><span className="auto-journey__brand"><span className="auto-journey__brand-mark">J</span> JACKDAN <span>PREMIUM VENTURES</span></span><span className="auto-journey__location"><i/> IMPORTED WITH CARE · DELIVERED IN GHANA</span></div>
       {stories.map(({eyebrow,title,copy,action,page,Icon},i)=><div key={eyebrow} className={`auto-journey__story ${chapter===i?'is-active':''}`} aria-hidden={chapter!==i}>
         <div className="auto-journey__copy"><span className="auto-journey__eyebrow"><Icon size={14}/>{eyebrow}</span><h1>{title}</h1><p>{copy}</p><div className="auto-journey__actions"><button onClick={()=>onNavigatePage(page)} className="auto-journey__cta">{action}<ArrowRight size={17}/></button>{i===0&&<a className="auto-journey__phone" href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+','')}?text=${encodeURIComponent(CONTACT_INFO.whatsappMessage)}`} target="_blank" rel="noreferrer">Talk to our team</a>}</div></div>

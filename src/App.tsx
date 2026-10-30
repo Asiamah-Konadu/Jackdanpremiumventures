@@ -156,7 +156,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen bg-dark-950 text-white font-sans selection:bg-gold-500 selection:text-dark-950 relative flex flex-col justify-between overflow-x-clip">
       {/* Global Ambient Background Glows that bring visuals to life on every page */}
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-gold-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
       <div className="fixed top-1/3 -right-48 w-[650px] h-[650px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none z-0" />
