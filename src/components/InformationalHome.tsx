@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Car, 
   Wrench, 
@@ -46,6 +46,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
   onNavigatePage,
   currentCurrency 
 }) => {
+  const homeRef = useRef<HTMLDivElement>(null);
   const [activeFlyerModal, setActiveFlyerModal] = useState<{
     title: string;
     image: string;
@@ -145,8 +146,25 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
   // Quick duty formula approximation for teaser widget
   const estimatedQuickDuty = Math.round(quickDutyPrice * 0.38 + (2026 - quickDutyYear > 10 ? 3000 : 800));
 
+  useEffect(() => {
+    const root = homeRef.current;
+    if (!root || !('IntersectionObserver' in window)) return;
+    const sections = Array.from(root.querySelectorAll<HTMLElement>(':scope > section'));
+    root.classList.add('home-editorial--ready');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('home-editorial__section--visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
+    sections.forEach(section => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="space-y-24 pb-20">
+    <div ref={homeRef} className="home-editorial space-y-24 pb-28">
       <AutoImportJourney onNavigatePage={onNavigatePage} />
 
       {/* 2. KEY STATS & CREDIBILITY BAR */}
