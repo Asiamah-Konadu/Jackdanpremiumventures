@@ -392,7 +392,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
       </section>
 
-      {/* 4. "THE MARQUE FLEET" — HIGH-END VEHICLE COLLECTION SHOWCASE */}
+      {/* 4. "THE MARQUE FLEET" — CURATED SHOWROOM LEDGER */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-dark-800/60">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
@@ -403,10 +403,9 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
               The Grand <span className="gold-gradient-text">Marque Collection</span>
             </h2>
             <p className="text-dark-300 text-sm mt-2 max-w-xl">
-              High-economy sedans, family crossovers, and luxury 4x4 workhorses ready for immediate clearance or direct shipping.
+              High-economy sedans, family crossovers, and luxury 4×4 workhorses — all with clean CarFax titles, ready for immediate customs clearance or direct shipping to Ghana.
             </p>
           </div>
-
           <button
             type="button"
             onClick={() => onNavigatePage('inventory')}
@@ -418,77 +417,123 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
         </div>
 
         {/* Cars Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {featuredCars.map((car) => (
             <div
               key={car.id}
-              className="rounded-3xl bg-gradient-to-b from-dark-900 to-dark-950 border border-dark-800 hover:border-gold-500/50 p-6 flex flex-col justify-between space-y-6 shadow-2xl transition-all group"
+              className="rounded-2xl bg-gradient-to-b from-dark-900/90 to-dark-950 border border-dark-800 hover:border-gold-500/50 flex flex-col shadow-2xl transition-all duration-300 group overflow-hidden"
             >
-              <div className="space-y-4">
-                {/* Photo Frame */}
-                <div className="relative rounded-2xl overflow-hidden aspect-[16/10] bg-dark-950 border border-dark-800">
-                  <img
-                    src={car.image}
-                    alt={car.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                  />
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase">
+              {/* Photo Frame */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-dark-950">
+                <img
+                  src={car.image}
+                  alt={car.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
+                  loading="lazy"
+                />
+                {/* Gradient overlay at bottom of image */}
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-dark-950 to-transparent" />
+
+                {/* Top badges */}
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-md bg-dark-950/90 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase">
                     {car.category}
-                  </div>
-                  <div className="absolute top-3 right-3 px-3 py-1 rounded-md bg-dark-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-white border border-dark-700">
-                    {car.year} MODEL
-                  </div>
+                  </span>
+                  {car.popular && (
+                    <span className="px-2.5 py-1 rounded-md bg-gold-500/20 backdrop-blur-md text-[10px] font-mono font-bold text-gold-300 border border-gold-500/40 uppercase">
+                      ★ Popular
+                    </span>
+                  )}
                 </div>
 
-                <div>
-                  <h3 className="font-heading text-xl font-bold text-white group-hover:text-gold-300 transition-colors">
-                    {car.name}
-                  </h3>
-                  <div className="text-2xl font-black text-gold-400 font-mono mt-1">
-                    {formatPrice(car.priceUSD)}
-                  </div>
-                  <p className="text-xs text-dark-400 font-mono mt-1">{car.engine}</p>
+                {/* Year badge top-right */}
+                <div className="absolute top-3 right-3">
+                  <span className="px-2.5 py-1 rounded-md bg-dark-950/90 backdrop-blur-md text-[10px] font-mono font-bold text-white border border-dark-700">
+                    {car.year}
+                  </span>
                 </div>
 
-                {/* Spyker-Style Specs Matrix */}
-                <div className="grid grid-cols-2 gap-2 text-xs text-dark-300 pt-3 border-t border-dark-800 font-mono text-[11px]">
-                  <div className="flex items-center gap-2">
-                    <Gauge className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{car.mileage}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Fuel className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{car.fuelType}</span>
-                  </div>
-                  <div className="flex items-center gap-2 col-span-2 text-dark-400">
-                    <MapPin className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{car.location}</span>
-                  </div>
+                {/* Condition badge bottom-left over gradient */}
+                <div className="absolute bottom-2.5 left-3">
+                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-semibold border border-emerald-500/30">
+                    ✓ {car.condition}
+                  </span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-dark-800 flex items-center gap-3">
-                <a
-                  href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl gold-gradient-btn text-xs font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Reserve on WhatsApp</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onNavigatePage('inventory')}
-                  className="py-3 px-4 rounded-xl bg-dark-900 hover:bg-dark-800 text-white border border-dark-700 text-xs font-semibold"
-                >
-                  Details
-                </button>
+              {/* Card body */}
+              <div className="p-5 flex flex-col flex-1 space-y-4">
+                {/* Name + Price */}
+                <div>
+                  <h3 className="font-heading text-lg font-bold text-white group-hover:text-gold-300 transition-colors leading-tight">
+                    {car.name}
+                  </h3>
+                  <p className="text-[11px] text-dark-400 font-mono mt-0.5">{car.engine}</p>
+                  <div className="text-2xl font-black text-gold-400 font-mono mt-2">
+                    {formatPrice(car.priceUSD)}
+                    <span className="text-[11px] font-normal text-dark-400 ml-1">CIF estimate</span>
+                  </div>
+                </div>
+
+                {/* Specs strip */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-mono text-dark-300 border-t border-dark-800/80 pt-3">
+                  <div className="flex items-center gap-1.5">
+                    <Gauge className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
+                    <span>{car.mileage}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Fuel className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
+                    <span>{car.fuelType}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 col-span-2 text-dark-400">
+                    <MapPin className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
+                    <span className="truncate">{car.location}</span>
+                  </div>
+                </div>
+
+                {/* Top 3 features */}
+                <div className="flex flex-wrap gap-1.5">
+                  {car.features.slice(0, 3).map((feat) => (
+                    <span
+                      key={feat}
+                      className="px-2 py-0.5 rounded-md bg-dark-950 border border-dark-800 text-[10px] text-dark-300 font-mono"
+                    >
+                      {feat}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Spacer pushes buttons to bottom */}
+                <div className="flex-1" />
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2.5 pt-2 border-t border-dark-800">
+                  <a
+                    href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2.5 px-4 rounded-xl gold-gradient-btn text-[11px] font-bold text-dark-950 flex items-center justify-center gap-1.5 shadow-md"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Reserve via WhatsApp</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => onNavigatePage('inventory')}
+                    className="py-2.5 px-3.5 rounded-xl bg-dark-900 hover:bg-dark-800 text-white border border-dark-700 hover:border-dark-600 text-[11px] font-semibold transition-colors"
+                  >
+                    Details
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Footer note */}
+        <p className="text-center text-[11px] text-dark-500 font-mono mt-8">
+          Prices shown are CIF estimates in your selected currency. Customs duties, DVLA registration &amp; delivery fees are additional. WhatsApp us for a complete landed cost breakdown.
+        </p>
       </section>
 
       {/* 5. BESPOKE ICUMS IMPORT DUTY & VALUATION CONSOLE */}
