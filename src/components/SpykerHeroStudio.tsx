@@ -820,9 +820,12 @@ export const SpykerHeroStudio: React.FC<SpykerHeroStudioProps> = ({
   };
 
   return (
-    <div className="relative w-full min-h-[660px] lg:min-h-[780px] bg-dark-950 border-b border-dark-800 overflow-hidden flex flex-col justify-between select-none">
+    <div 
+      id="hero"
+      className="relative w-full min-h-[720px] lg:min-h-[820px] bg-dark-950 border-b border-dark-800 overflow-hidden flex flex-col justify-between select-none pt-24 sm:pt-28 lg:pt-32"
+    >
       {/* Top Header: Latin Axiom & Mode Tabs */}
-      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 pb-4 border-b border-white/10 backdrop-blur-md bg-dark-950/70 rounded-b-2xl flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 border border-white/10 backdrop-blur-md bg-dark-950/80 rounded-2xl flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xl">
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full border border-gold-500/60 flex items-center justify-center text-gold-400 font-heading text-xs font-black shadow-[0_0_20px_rgba(212,175,55,0.3)] bg-dark-950/80">
