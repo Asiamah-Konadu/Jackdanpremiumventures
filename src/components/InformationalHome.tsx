@@ -393,147 +393,277 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
       </section>
 
       {/* 4. "THE MARQUE FLEET" — CURATED SHOWROOM LEDGER */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-dark-800/60">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div>
-            <span className="text-[10px] tracking-[0.25em] font-mono uppercase text-gold-400 font-bold block mb-2">
-              Curated Showroom Ledger
-            </span>
-            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-              The Grand <span className="gold-gradient-text">Marque Collection</span>
-            </h2>
-            <p className="text-dark-300 text-sm mt-2 max-w-xl">
-              High-economy sedans, family crossovers, and luxury 4×4 workhorses — all with clean CarFax titles, ready for immediate customs clearance or direct shipping to Ghana.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onNavigatePage('inventory')}
-            className="self-start md:self-end px-6 py-3 rounded-xl bg-dark-900 hover:bg-dark-800 border border-gold-500/40 text-gold-400 hover:text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg"
-          >
-            <span>View All {VEHICLES.length} Fleet Models</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+      <section className="py-24 border-t border-dark-800/60 relative overflow-hidden">
+        {/* Ambient background glow */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gold-500/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gold-500/4 rounded-full blur-[100px] pointer-events-none" />
 
-        {/* Cars Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredCars.map((car) => (
-            <div
-              key={car.id}
-              className="rounded-2xl bg-gradient-to-b from-dark-900/90 to-dark-950 border border-dark-800 hover:border-gold-500/50 flex flex-col shadow-2xl transition-all duration-300 group overflow-hidden"
-            >
-              {/* Photo Frame */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-dark-950">
-                <img
-                  src={car.image}
-                  alt={car.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                  loading="lazy"
-                />
-                {/* Gradient overlay at bottom of image */}
-                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-dark-950 to-transparent" />
-
-                {/* Top badges */}
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-md bg-dark-950/90 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase">
-                    {car.category}
-                  </span>
-                  {car.popular && (
-                    <span className="px-2.5 py-1 rounded-md bg-gold-500/20 backdrop-blur-md text-[10px] font-mono font-bold text-gold-300 border border-gold-500/40 uppercase">
-                      ★ Popular
-                    </span>
-                  )}
-                </div>
-
-                {/* Year badge top-right */}
-                <div className="absolute top-3 right-3">
-                  <span className="px-2.5 py-1 rounded-md bg-dark-950/90 backdrop-blur-md text-[10px] font-mono font-bold text-white border border-dark-700">
-                    {car.year}
-                  </span>
-                </div>
-
-                {/* Condition badge bottom-left over gradient */}
-                <div className="absolute bottom-2.5 left-3">
-                  <span className="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-semibold border border-emerald-500/30">
-                    ✓ {car.condition}
-                  </span>
-                </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/25 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
+                <span className="text-[10px] tracking-[0.3em] font-mono uppercase text-gold-400 font-bold">
+                  Curated Showroom Ledger — Live Inventory
+                </span>
               </div>
+              <h2 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none">
+                The Grand <span className="gold-gradient-text">Marque Collection</span>
+              </h2>
+              <p className="text-dark-300 text-sm mt-3 max-w-2xl leading-relaxed">
+                High-economy sedans, family crossovers &amp; luxury 4×4 workhorses — each with clean CarFax title, laser-aligned chassis, and zero flood history. All priced CIF with turnkey ICUMS customs clearance to Tema Port.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigatePage('inventory')}
+              className="self-start md:self-end flex-shrink-0 px-6 py-3 rounded-xl bg-dark-900/80 hover:bg-dark-800 border border-gold-500/40 hover:border-gold-500/70 text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-wider flex items-center gap-2.5 transition-all duration-200 shadow-lg backdrop-blur-sm"
+            >
+              <span>Browse All {VEHICLES.length} Models</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
 
-              {/* Card body */}
-              <div className="p-5 flex flex-col flex-1 space-y-4">
-                {/* Name + Price */}
-                <div>
-                  <h3 className="font-heading text-lg font-bold text-white group-hover:text-gold-300 transition-colors leading-tight">
-                    {car.name}
-                  </h3>
-                  <p className="text-[11px] text-dark-400 font-mono mt-0.5">{car.engine}</p>
-                  <div className="text-2xl font-black text-gold-400 font-mono mt-2">
-                    {formatPrice(car.priceUSD)}
-                    <span className="text-[11px] font-normal text-dark-400 ml-1">CIF estimate</span>
+          {/* === FEATURED LAYOUT: 1 hero card left + 2 stacked right === */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+            {/* Hero card (large) — first vehicle */}
+            {featuredCars[0] && (() => {
+              const car = featuredCars[0];
+              return (
+                <div className="lg:col-span-3 rounded-2xl overflow-hidden border border-dark-800/80 hover:border-gold-500/50 bg-dark-900 shadow-2xl group transition-all duration-500 flex flex-col">
+                  {/* Full-bleed image — taller aspect */}
+                  <div className="relative aspect-[4/3] lg:aspect-[16/10] overflow-hidden bg-dark-950">
+                    <img
+                      src={car.image}
+                      alt={car.name}
+                      className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+                      loading="lazy"
+                    />
+                    {/* Deep scrim */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/30 to-transparent" />
+
+                    {/* Top row badges */}
+                    <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-3 py-1 rounded-lg bg-dark-950/80 backdrop-blur-md text-[10px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase tracking-wider">
+                          {car.category}
+                        </span>
+                        {car.popular && (
+                          <span className="px-3 py-1 rounded-lg bg-gold-500/20 backdrop-blur-md text-[10px] font-mono font-bold text-gold-200 border border-gold-500/40 uppercase tracking-wider">
+                            ★ Most Popular
+                          </span>
+                        )}
+                      </div>
+                      <span className="px-3 py-1 rounded-lg bg-dark-950/80 backdrop-blur-md text-[11px] font-mono font-bold text-white border border-dark-700">
+                        {car.year}
+                      </span>
+                    </div>
+
+                    {/* Bottom overlay: name + price + condition */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+                      <div className="mb-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/25 text-emerald-300 text-[10px] font-mono font-semibold border border-emerald-500/30">
+                          <CheckCircle2 className="w-3 h-3" />
+                          {car.condition}
+                        </span>
+                      </div>
+                      <h3 className="font-heading text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-gold-200 transition-colors">
+                        {car.name}
+                      </h3>
+                      <p className="text-dark-300 text-xs font-mono mt-1">{car.engine}</p>
+                      <div className="flex items-baseline gap-2 mt-3">
+                        <span className="text-3xl font-black font-mono text-gold-400">{formatPrice(car.priceUSD)}</span>
+                        <span className="text-[11px] text-dark-400 font-mono">CIF estimate</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card footer */}
+                  <div className="p-5 sm:p-6 flex flex-col gap-4 bg-gradient-to-b from-dark-900 to-dark-950">
+                    {/* Specs row */}
+                    <div className="flex items-center gap-5 text-[11px] font-mono text-dark-300">
+                      <span className="flex items-center gap-1.5"><Gauge className="w-3.5 h-3.5 text-gold-400" />{car.mileage}</span>
+                      <span className="flex items-center gap-1.5"><Fuel className="w-3.5 h-3.5 text-gold-400" />{car.fuelType}</span>
+                      <span className="flex items-center gap-1.5 text-dark-400"><Car className="w-3.5 h-3.5 text-gold-400" />{car.transmission}</span>
+                    </div>
+                    {/* Location */}
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-dark-400">
+                      <MapPin className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
+                      <span>{car.location}</span>
+                    </div>
+                    {/* Features */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {car.features.slice(0, 4).map(feat => (
+                        <span key={feat} className="px-2 py-0.5 rounded-md bg-dark-800/80 border border-dark-700 text-[10px] text-dark-300 font-mono">
+                          {feat}
+                        </span>
+                      ))}
+                    </div>
+                    {/* VIN preview */}
+                    <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-dark-800/50 border border-dark-700/60">
+                      <ShieldCheck className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
+                      <span className="text-[10px] font-mono text-dark-400">VIN: <span className="text-dark-200 tracking-widest">{car.vinPreview}</span></span>
+                      <span className="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-wider">Clean CarFax</span>
+                    </div>
+                    {/* CTA buttons */}
+                    <div className="flex items-center gap-3 pt-1">
+                      <a
+                        href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-3 px-5 rounded-xl gold-gradient-btn text-[12px] font-bold text-dark-950 flex items-center justify-center gap-2 shadow-lg"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        Reserve via WhatsApp
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => onNavigatePage('inventory')}
+                        className="py-3 px-4 rounded-xl bg-dark-800 hover:bg-dark-700 text-white border border-dark-700 hover:border-gold-500/40 text-[12px] font-semibold transition-all"
+                      >
+                        Details
+                      </button>
+                    </div>
                   </div>
                 </div>
+              );
+            })()}
 
-                {/* Specs strip */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-mono text-dark-300 border-t border-dark-800/80 pt-3">
-                  <div className="flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
-                    <span>{car.mileage}</span>
+            {/* Right column — 2 compact cards stacked */}
+            <div className="lg:col-span-2 flex flex-col gap-5">
+              {featuredCars.slice(1, 3).map((car) => (
+                <div
+                  key={car.id}
+                  className="rounded-2xl overflow-hidden border border-dark-800/80 hover:border-gold-500/50 bg-dark-900 shadow-2xl group transition-all duration-500 flex flex-col flex-1"
+                >
+                  {/* Image */}
+                  <div className="relative aspect-[16/9] overflow-hidden bg-dark-950">
+                    <img
+                      src={car.image}
+                      alt={car.name}
+                      className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700 ease-out"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent" />
+
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                      <div className="flex gap-1.5">
+                        <span className="px-2 py-0.5 rounded-md bg-dark-950/85 backdrop-blur-md text-[9px] font-mono font-bold text-gold-400 border border-gold-500/30 uppercase">
+                          {car.category}
+                        </span>
+                        {car.popular && (
+                          <span className="px-2 py-0.5 rounded-md bg-gold-500/20 backdrop-blur-md text-[9px] font-mono font-bold text-gold-300 border border-gold-500/40 uppercase">
+                            ★ Popular
+                          </span>
+                        )}
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-dark-950/85 backdrop-blur-md text-[9px] font-mono font-bold text-white border border-dark-700">
+                        {car.year}
+                      </span>
+                    </div>
+
+                    {/* Condition */}
+                    <div className="absolute bottom-2.5 left-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[9px] font-mono font-semibold border border-emerald-500/30">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        {car.condition}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Fuel className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
-                    <span>{car.fuelType}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 col-span-2 text-dark-400">
-                    <MapPin className="w-3.5 h-3.5 text-gold-400 flex-shrink-0" />
-                    <span className="truncate">{car.location}</span>
+
+                  {/* Body */}
+                  <div className="p-4 flex flex-col gap-3 flex-1">
+                    <div>
+                      <h3 className="font-heading text-base font-bold text-white group-hover:text-gold-200 transition-colors leading-tight">
+                        {car.name}
+                      </h3>
+                      <p className="text-[10px] text-dark-400 font-mono mt-0.5">{car.engine}</p>
+                    </div>
+
+                    {/* Price + specs inline */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xl font-black font-mono text-gold-400">{formatPrice(car.priceUSD)}</span>
+                        <span className="text-[10px] text-dark-400 font-mono ml-1">CIF</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] font-mono text-dark-400">
+                        <span className="flex items-center gap-1"><Gauge className="w-3 h-3 text-gold-400" />{car.mileage}</span>
+                        <span className="flex items-center gap-1"><Fuel className="w-3 h-3 text-gold-400" />{car.fuelType}</span>
+                      </div>
+                    </div>
+
+                    {/* Feature pills — top 2 */}
+                    <div className="flex flex-wrap gap-1">
+                      {car.features.slice(0, 2).map(feat => (
+                        <span key={feat} className="px-1.5 py-0.5 rounded bg-dark-800/80 border border-dark-700 text-[9px] text-dark-300 font-mono">
+                          {feat}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-dark-400">
+                      <MapPin className="w-3 h-3 text-gold-400 flex-shrink-0" />
+                      <span className="truncate">{car.location}</span>
+                    </div>
+
+                    {/* Spacer */}
+                    <div className="flex-1" />
+
+                    {/* Buttons */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-dark-800/80">
+                      <a
+                        href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-2 px-3 rounded-lg gold-gradient-btn text-[10px] font-bold text-dark-950 flex items-center justify-center gap-1.5"
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        Reserve
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => onNavigatePage('inventory')}
+                        className="py-2 px-3 rounded-lg bg-dark-800 hover:bg-dark-700 text-white border border-dark-700 hover:border-dark-600 text-[10px] font-semibold transition-colors"
+                      >
+                        Details
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                {/* Top 3 features */}
-                <div className="flex flex-wrap gap-1.5">
-                  {car.features.slice(0, 3).map((feat) => (
-                    <span
-                      key={feat}
-                      className="px-2 py-0.5 rounded-md bg-dark-950 border border-dark-800 text-[10px] text-dark-300 font-mono"
-                    >
-                      {feat}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Spacer pushes buttons to bottom */}
-                <div className="flex-1" />
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2.5 pt-2 border-t border-dark-800">
-                  <a
-                    href={`https://wa.me/${CONTACT_INFO.primaryPhoneFormatted.replace('+', '')}?text=${encodeURIComponent(`Hello Jackdan Concierge, I would like to reserve / inquire about the ${car.name} priced at ${formatPrice(car.priceUSD)}.`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-2.5 px-4 rounded-xl gold-gradient-btn text-[11px] font-bold text-dark-950 flex items-center justify-center gap-1.5 shadow-md"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Reserve via WhatsApp</span>
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => onNavigatePage('inventory')}
-                    className="py-2.5 px-3.5 rounded-xl bg-dark-900 hover:bg-dark-800 text-white border border-dark-700 hover:border-dark-600 text-[11px] font-semibold transition-colors"
-                  >
-                    Details
-                  </button>
-                </div>
+          {/* Bottom banner strip — remaining count + CTA */}
+          <div className="mt-8 rounded-2xl border border-dark-800/80 bg-gradient-to-r from-dark-900 via-dark-900/80 to-dark-900 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gold-500/15 border border-gold-500/30 flex items-center justify-center flex-shrink-0">
+                <Car className="w-5 h-5 text-gold-400" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm">{VEHICLES.length - 3} more vehicles available in the full ledger</p>
+                <p className="text-dark-400 text-[11px] font-mono mt-0.5">Toyota Yaris · Honda CR-V · Toyota Camry · Hilux 4x4 · Hyundai Tucson — all with clean titles</p>
               </div>
             </div>
-          ))}
-        </div>
+            <button
+              type="button"
+              onClick={() => onNavigatePage('inventory')}
+              className="flex-shrink-0 px-6 py-3 rounded-xl gold-gradient-btn text-[12px] font-bold text-dark-950 flex items-center gap-2 shadow-lg"
+            >
+              <span>View Full Inventory</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
 
-        {/* Footer note */}
-        <p className="text-center text-[11px] text-dark-500 font-mono mt-8">
-          Prices shown are CIF estimates in your selected currency. Customs duties, DVLA registration &amp; delivery fees are additional. WhatsApp us for a complete landed cost breakdown.
-        </p>
+          {/* Footer disclaimer */}
+          <p className="text-center text-[11px] text-dark-500 font-mono mt-6">
+            Prices shown are CIF estimates in your selected currency. Customs duties, DVLA registration &amp; delivery fees are additional. WhatsApp us for a complete landed cost breakdown.
+          </p>
+        </div>
       </section>
 
       {/* 5. BESPOKE ICUMS IMPORT DUTY & VALUATION CONSOLE */}
