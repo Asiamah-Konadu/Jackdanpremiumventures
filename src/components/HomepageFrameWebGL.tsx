@@ -33,7 +33,8 @@ export function HomepageFrameWebGL() {
       uViewport: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       uImage: { value: new THREE.Vector2(16, 9) },
       uReady: { value: 0 },
-      uSide: { value: -1 },
+      uCenter: { value: 0.5 },
+      uLayout: { value: 0 },
     };
     const material = new THREE.ShaderMaterial({
       uniforms,
@@ -44,26 +45,25 @@ export function HomepageFrameWebGL() {
         uniform vec2 uViewport;
         uniform vec2 uImage;
         uniform float uReady;
-        uniform float uSide;
+        uniform float uCenter;
+        uniform float uLayout;
         void main(){
           float screenAspect=uViewport.x/uViewport.y;
           float imageAspect=uImage.x/uImage.y;
+          float regionWidth=mix(1.0,0.52,uLayout);
+          float startX=clamp(uCenter-regionWidth*0.5,0.0,1.0);
+          float endX=clamp(uCenter+regionWidth*0.5,0.0,1.0);
           vec2 regionUv=vUv;
-          float inside=1.0;
-          if(uSide>=0.0){
-            float startX=uSide>0.5?0.48:0.0;
-            float endX=uSide>0.5?1.0:0.52;
-            inside=step(startX,vUv.x)*step(vUv.x,endX);
-            regionUv.x=(vUv.x-startX)/(endX-startX);
-            inside*=smoothstep(0.0,0.035,regionUv.x)*(1.0-smoothstep(0.965,1.0,regionUv.x));
-          }
-          float regionAspect=screenAspect*(uSide<0.0?1.0:0.52);
+          float inside=step(startX,vUv.x)*step(vUv.x,endX);
+          regionUv.x=(vUv.x-startX)/max(0.001,endX-startX);
+          inside*=smoothstep(0.0,0.035,regionUv.x)*(1.0-smoothstep(0.965,1.0,regionUv.x));
+          float regionAspect=screenAspect*regionWidth;
           vec2 cover=regionAspect>imageAspect?vec2(1.0,imageAspect/regionAspect):vec2(regionAspect/imageAspect,1.0);
           vec2 uv=(regionUv-0.5)*cover+0.5;
           vec3 color=texture2D(uFrame,uv).rgb;
-          float vignette=1.0-smoothstep(0.18,0.9,distance(vUv,vec2(0.5)));
-          color*=mix(0.38,0.55,vignette);
-          gl_FragColor=vec4(color,uReady*inside*0.76);
+          float vignette=1.0-smoothstep(0.18,0.9,distance(regionUv,vec2(0.5)));
+          color*=mix(0.84,1.0,vignette);
+          gl_FragColor=vec4(color,uReady*inside*0.94);
         }
       `,
       depthTest: false,
@@ -76,6 +76,10 @@ export function HomepageFrameWebGL() {
     let raf = 0;
     let currentFrame = 0;
     let desiredFrame = 0;
+    let currentCenter = 0.5;
+    let desiredCenter = 0.5;
+    let currentLayout = 0;
+    let desiredLayout = 0;
     let uploadedFrame = -1;
     const images: HTMLImageElement[] = [];
     const sections = Array.from(page.querySelectorAll<HTMLElement>(':scope > section'));
@@ -107,10 +111,10 @@ export function HomepageFrameWebGL() {
       }
       if (sceneSide !== nextSide) {
         sceneSide = nextSide;
-        uniforms.uSide.value = nextSide;
+        desiredLayout = nextSide < 0 ? 0 : 1;
+        desiredCenter = nextSide === 0 ? 0.26 : nextSide === 1 ? 0.74 : 0.5;
         page.classList.toggle('scene-content-left', contentSide === 'left');
         page.classList.toggle('scene-content-right', contentSide === 'right');
-        canvas.animate([{ opacity: 0.12 }, { opacity: 1 }], { duration: 750, easing: 'cubic-bezier(.22,.7,.2,1)' });
       }
     };
     const resize = () => {
@@ -129,6 +133,10 @@ export function HomepageFrameWebGL() {
     const draw = () => {
       if (!alive) return;
       currentFrame += (desiredFrame - currentFrame) * 0.12;
+      currentCenter += (desiredCenter - currentCenter) * 0.075;
+      currentLayout += (desiredLayout - currentLayout) * 0.075;
+      uniforms.uCenter.value = currentCenter;
+      uniforms.uLayout.value = currentLayout;
       const frameIndex = Math.round(currentFrame);
       const image = images[frameIndex];
       if (image?.complete && image.naturalWidth && frameIndex !== uploadedFrame) {

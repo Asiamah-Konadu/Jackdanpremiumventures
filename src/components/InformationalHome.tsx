@@ -211,19 +211,36 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
 
   useEffect(() => {
     const root = homeRef.current;
-    if (!root || !('IntersectionObserver' in window)) return;
+    if (!root) return;
     const sections = Array.from(root.querySelectorAll<HTMLElement>(':scope > section'));
     root.classList.add('home-editorial--ready');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('home-editorial__section--visible');
-          observer.unobserve(entry.target);
-        }
+    let raf = 0;
+    const updateMotion = () => {
+      raf = 0;
+      const center = window.innerHeight * 0.52;
+      const travel = Math.min(window.innerWidth * (window.innerWidth < 761 ? 0.2 : 0.55), 640);
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        const sectionCenter = (rect.top + rect.bottom) / 2;
+        const progress = 1 - Math.min(1, Math.abs(sectionCenter - center) / (window.innerHeight * 0.85));
+        const fromOpposite = index % 2 === 0 ? 1 : -1;
+        const content = section.firstElementChild as HTMLElement | null;
+        if (!content) return;
+        content.style.opacity = String(0.28 + progress * 0.72);
+        content.style.transform = `translate3d(${fromOpposite * (1 - progress) * travel}px, ${(1 - progress) * 18}px, 0)`;
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -5% 0px' });
-    sections.forEach(section => observer.observe(section));
-    return () => observer.disconnect();
+    };
+    const scheduleMotion = () => {
+      if (!raf) raf = requestAnimationFrame(updateMotion);
+    };
+    window.addEventListener('scroll', scheduleMotion, { passive: true });
+    window.addEventListener('resize', scheduleMotion);
+    updateMotion();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', scheduleMotion);
+      window.removeEventListener('resize', scheduleMotion);
+    };
   }, []);
 
   return (

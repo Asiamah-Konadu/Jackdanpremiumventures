@@ -135,7 +135,7 @@
 .home-editorial { position:relative; isolation:isolate; counter-reset: home-chapter; background:#080c14; }
 .home-editorial > section { position:relative; z-index:1; }
 .home-editorial > #hero { z-index:1; }
-.homepage-webgl { position:fixed; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; opacity:.78; }
+.homepage-webgl { position:fixed; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; opacity:.98; }
 .home-editorial > section:not(:first-child) { position:relative; scroll-margin-top:100px; }
 .home-editorial > section:not(:first-child)::before { counter-increment:home-chapter; content:"0" counter(home-chapter) " / JACKDAN JOURNAL"; position:absolute; top:-34px; left:0; color:#bba36c; font-size:8px; font-weight:750; letter-spacing:.2em; }
 .home-editorial--ready > section:not(.home-editorial__section--visible) > div { opacity:.28; transform:translateY(24px); }
@@ -195,11 +195,12 @@
 @media(prefers-reduced-motion:reduce) { .home-editorial > section > div,.home-editorial > section:not(:first-child) img,.home-editorial > section:not(:first-child) .group:hover { transition:none; transform:none; } }
 
 /* Alternating split-scene chapters: copy and the WebGL frame trade sides. */
+.home-editorial--ready > section > div { transition: none !important; will-change: opacity, transform; }
 @media (min-width: 761px) {
   .home-editorial > section:not(#hero) > div {
     width: min(58%, 820px);
     max-width: none;
-    transition: opacity .7s ease, transform .85s cubic-bezier(.2,.7,.2,1), margin .85s cubic-bezier(.2,.7,.2,1);
+    will-change: opacity, transform;
   }
   .home-editorial > section:not(#hero):nth-of-type(odd) > div {
     margin-left: max(4vw, calc((100vw - 1400px) / 2));
@@ -209,12 +210,9 @@
     margin-left: auto;
     margin-right: max(4vw, calc((100vw - 1400px) / 2));
   }
-  .home-editorial--ready > section:not(.home-editorial__section--visible):nth-of-type(odd) > div { opacity: 0; transform: translate(-54px, 18px); }
-  .home-editorial--ready > section:not(.home-editorial__section--visible):nth-of-type(even) > div { opacity: 0; transform: translate(54px, 18px); }
-  .home-editorial > section.home-editorial__section--visible > div { opacity: 1; transform: translate(0, 0); }
 }
 @media (max-width: 760px) {
-  .homepage-webgl { opacity: .32; }
+  .homepage-webgl { opacity: .72; }
   .home-editorial > section:not(#hero) > div { position: relative; z-index: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
