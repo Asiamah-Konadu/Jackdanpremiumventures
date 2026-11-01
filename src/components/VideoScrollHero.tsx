@@ -17,6 +17,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { CONTACT_INFO } from '../data/inventory';
+import { getHeroFrameImages, HERO_FRAME_COUNT } from './heroFrames';
 
 interface VideoScrollHeroProps {
   onNavigatePage: (page: string) => void;
@@ -24,11 +25,7 @@ interface VideoScrollHeroProps {
 }
 
 /* ─── Constants ───────────────────────────────────────────────── */
-const TOTAL_FRAMES = 180;
-const FRAME_BASE = '/hero-frames/ezgif-frame-';
-
-const pad3 = (n: number) => String(n).padStart(3, '0');
-const frameUrl = (n: number) => `${FRAME_BASE}${pad3(n)}.jpg`;
+const TOTAL_FRAMES = HERO_FRAME_COUNT;
 
 /* ─── Preloader hook ──────────────────────────────────────────── */
 function useFramePreloader(total: number) {
@@ -37,30 +34,35 @@ function useFramePreloader(total: number) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const imgs: HTMLImageElement[] = [];
+    const imgs = getHeroFrameImages();
     let loaded = 0;
+    const settled = new WeakSet<HTMLImageElement>();
+    const handlers = new Map<HTMLImageElement, () => void>();
 
-    const onLoad = () => {
+    const onLoad = (img: HTMLImageElement) => {
+      if (settled.has(img)) return;
+      settled.add(img);
       loaded++;
       setLoadedCount(loaded);
       if (loaded >= total) setReady(true);
     };
 
-    for (let i = 1; i <= total; i++) {
-      const img = new Image();
-      img.src = frameUrl(i);
-      img.onload = onLoad;
-      img.onerror = onLoad; // count errors too so we don't stall
-      imgs.push(img);
-    }
-
     images.current = imgs;
+    imgs.slice(0, total).forEach(img => {
+      const handler = () => onLoad(img);
+      handlers.set(img, handler);
+      img.addEventListener('load', handler);
+      img.addEventListener('error', handler);
+      if (img.complete) handler();
+    });
 
     return () => {
-      // cancel pending loads
       imgs.forEach(img => {
-        img.onload = null;
-        img.onerror = null;
+        const handler = handlers.get(img);
+        if (handler) {
+          img.removeEventListener('load', handler);
+          img.removeEventListener('error', handler);
+        }
       });
     };
   }, [total]);

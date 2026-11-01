@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { getHeroFrameImages, HERO_FRAME_COUNT } from './heroFrames';
 
-const TOTAL_FRAMES = 180;
-const frameUrl = (index: number) => `/hero-frames/ezgif-frame-${String(index).padStart(3, '0')}.jpg`;
+const TOTAL_FRAMES = HERO_FRAME_COUNT;
 
 /** A single WebGL texture follows the whole homepage's scroll position. */
 export function HomepageFrameWebGL() {
@@ -81,7 +81,7 @@ export function HomepageFrameWebGL() {
     let currentLayout = 0;
     let desiredLayout = 0;
     let uploadedFrame = -1;
-    const images: HTMLImageElement[] = [];
+    const images = getHeroFrameImages();
     const sections = Array.from(page.querySelectorAll<HTMLElement>(':scope > section'));
     const hero = page.querySelector<HTMLElement>('#hero');
     let sceneSide = -2;
@@ -123,13 +123,6 @@ export function HomepageFrameWebGL() {
       updateProgress();
     };
 
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
-      const image = new Image();
-      image.decoding = 'async';
-      image.src = frameUrl(i + 1);
-      images.push(image);
-    }
-
     const draw = () => {
       if (!alive) return;
       currentFrame += (desiredFrame - currentFrame) * 0.12;
@@ -160,7 +153,6 @@ export function HomepageFrameWebGL() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', updateProgress);
       window.removeEventListener('resize', resize);
-      images.forEach(image => { image.src = ''; });
       texture.dispose();
       geometry.dispose();
       material.dispose();
