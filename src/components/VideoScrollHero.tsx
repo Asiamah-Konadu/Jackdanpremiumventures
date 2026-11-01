@@ -347,20 +347,6 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
           className="absolute left-0 right-0 flex items-center justify-between px-4 sm:px-8 lg:px-12"
           style={{ zIndex: 20, top: '6.5rem' }}
         >
-          {/* Brand mark */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full border border-gold-500/60 flex items-center justify-center text-gold-400 font-heading text-[10px] font-black shadow-[0_0_18px_rgba(212,175,55,0.3)] bg-dark-950/80">
-              JKD
-            </div>
-            <div>
-              <span className="text-[10px] sm:text-xs tracking-[0.26em] uppercase text-gold-400 font-bold block">
-                "NULLA TENACI INVIA EST VIA"
-              </span>
-              <span className="text-[9px] tracking-[0.14em] uppercase text-dark-400 font-mono">
-                Jackdan Premium Ventures · Est. Accra 2026
-              </span>
-            </div>
-          </div>
 
           {/* Controls */}
           <div className="flex items-center gap-2">
