@@ -305,15 +305,15 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
           style={{
             zIndex: 2,
             background:
-              'radial-gradient(ellipse at 50% 100%, rgba(8,12,20,0.72) 0%, transparent 65%), ' +
-              'linear-gradient(to top, rgba(8,12,20,0.88) 0%, rgba(8,12,20,0.2) 35%, rgba(8,12,20,0.35) 100%)',
+              'radial-gradient(ellipse at 50% 100%, rgba(8,12,20,0.55) 0%, transparent 65%), ' +
+              'linear-gradient(to top, rgba(8,12,20,0.75) 0%, rgba(8,12,20,0.08) 40%, rgba(8,12,20,0.18) 100%)',
           }}
         />
 
         {/* ── Top nav fade ── */}
         <div
           className="absolute top-0 inset-x-0 h-28 pointer-events-none"
-          style={{ zIndex: 3, background: 'linear-gradient(to bottom, rgba(8,12,20,0.9), transparent)' }}
+          style={{ zIndex: 3, background: 'linear-gradient(to bottom, rgba(8,12,20,0.7), transparent)' }}
         />
 
         {/* ══ Loading screen — shown until enough frames are ready ══ */}
@@ -416,18 +416,17 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
                 {/* Headline */}
                 <div>
                   <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white uppercase leading-[1.01]"
-                    style={{ textShadow: '0 2px 32px rgba(8,12,20,0.9), 0 1px 8px rgba(8,12,20,0.9)' }}
+                    style={{ textShadow: '0 2px 40px rgba(8,12,20,1), 0 1px 12px rgba(8,12,20,1)' }}
                   >
-                    YOUR TRUSTED<br />
                     <span className="gold-gradient-text">AUTO IMPORT</span><br />
-                    <span className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black">& EXPORT PARTNER</span>
+                    <span className="text-white">& EXPORT PARTNER</span>
                   </h1>
                   <p
-                    className="mt-4 text-dark-200 text-sm sm:text-base leading-relaxed max-w-lg"
-                    style={{ textShadow: '0 1px 12px rgba(8,12,20,0.95)' }}
+                    className="mt-4 text-white/90 text-sm sm:text-base leading-relaxed max-w-lg font-medium"
+                    style={{ textShadow: '0 1px 16px rgba(8,12,20,1), 0 2px 32px rgba(8,12,20,1)' }}
                   >
-                    Premium luxury SUVs, executive sedans, and certified OEM spare parts — sourced from verified auctions in USA, Canada & UAE, cleared through Port of Tema with{' '}
-                    <strong className="text-white">zero demurrage</strong>.
+                    Sourced from USA, Canada & UAE auctions — luxury SUVs, executive sedans & genuine OEM parts, cleared through{' '}
+                    <strong className="text-white">Port of Tema with zero demurrage</strong>.
                   </p>
                 </div>
 
