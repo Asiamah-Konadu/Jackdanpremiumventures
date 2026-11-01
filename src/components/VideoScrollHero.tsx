@@ -24,7 +24,7 @@ interface VideoScrollHeroProps {
 }
 
 /* ─── Constants ───────────────────────────────────────────────── */
-const TOTAL_FRAMES = 205;
+const TOTAL_FRAMES = 180;
 const FRAME_BASE = '/hero-frames/ezgif-frame-';
 const SCROLL_MULTIPLIER = 5; // px of scroll per frame — controls speed
 
