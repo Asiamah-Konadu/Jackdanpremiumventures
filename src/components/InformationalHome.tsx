@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES, VEHICLES, SPARE_PARTS } from '../data/inventory';
 import { VideoScrollHero } from './VideoScrollHero';
+import { HomepageFrameWebGL } from './HomepageFrameWebGL';
 
 interface InformationalHomeProps {
   onNavigatePage: (page: string) => void;
@@ -226,7 +227,8 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
   }, []);
 
   return (
-    <div ref={homeRef} className="home-editorial bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 pb-28">
+    <div ref={homeRef} className="home-editorial text-white selection:bg-gold-500 selection:text-dark-950 pb-28">
+      <HomepageFrameWebGL />
       {/* 1. HERO: SCROLL-DRIVEN VIDEO FRAME ANIMATION */}
       <VideoScrollHero
         onNavigatePage={onNavigatePage}

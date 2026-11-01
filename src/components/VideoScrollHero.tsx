@@ -26,7 +26,6 @@ interface VideoScrollHeroProps {
 /* ─── Constants ───────────────────────────────────────────────── */
 const TOTAL_FRAMES = 180;
 const FRAME_BASE = '/hero-frames/ezgif-frame-';
-const SCROLL_MULTIPLIER = 5; // px of scroll per frame — controls speed
 
 const pad3 = (n: number) => String(n).padStart(3, '0');
 const frameUrl = (n: number) => `${FRAME_BASE}${pad3(n)}.jpg`;
@@ -187,13 +186,14 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
   /* ── Scroll handler ── */
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const page = container?.closest<HTMLElement>('.home-editorial');
+    if (!container || !page) return;
 
     const onScroll = () => {
-      const rect = container.getBoundingClientRect();
-      const scrollHeight = container.offsetHeight - window.innerHeight;
+      const rect = page.getBoundingClientRect();
+      const scrollHeight = page.scrollHeight - window.innerHeight;
       const rawScrolled = -rect.top;
-      const progress = Math.min(1, Math.max(0, rawScrolled / scrollHeight));
+      const progress = Math.min(1, Math.max(0, rawScrolled / Math.max(1, scrollHeight)));
 
       setScrollProgress(progress);
       targetFrameRef.current = progress * (TOTAL_FRAMES - 1);
@@ -263,15 +263,13 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
 
   const ActiveBadgeIcon = BADGES[activeBadge].icon;
 
-  /* ── Scroll height: each frame gets SCROLL_MULTIPLIER px of scroll ── */
-  const scrollHeight = TOTAL_FRAMES * SCROLL_MULTIPLIER;
-
+  /* ── Opening hero viewport ── */
   return (
     /* Outer scroll container — gives us the scroll distance */
     <div
       ref={containerRef}
       id="hero"
-      style={{ height: `calc(${scrollHeight}px + 100vh)` }}
+      style={{ height: '100svh' }}
       className="relative"
     >
       {/* ── Sticky viewport ── */}
