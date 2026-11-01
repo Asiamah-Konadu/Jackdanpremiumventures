@@ -39,7 +39,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { CONTACT_INFO, EXCHANGE_RATES, VEHICLES, SPARE_PARTS } from '../data/inventory';
-import { SpykerHeroStudio } from './SpykerHeroStudio';
+import { VideoScrollHero } from './VideoScrollHero';
 
 interface InformationalHomeProps {
   onNavigatePage: (page: string) => void;
@@ -227,8 +227,8 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({
 
   return (
     <div ref={homeRef} className="home-editorial bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 pb-28">
-      {/* 1. HERO: SPYKER-INSPIRED 3D WEBGL STUDIO & LIVERY CONFIGURATOR */}
-      <SpykerHeroStudio
+      {/* 1. HERO: SCROLL-DRIVEN VIDEO FRAME ANIMATION */}
+      <VideoScrollHero
         onNavigatePage={onNavigatePage}
         onOpenFlyerModal={() => setActiveFlyerModal(flyers[0])}
       />

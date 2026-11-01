@@ -114,6 +114,23 @@
 }
 @media(prefers-reduced-motion:reduce) { .auto-journey__story,.auto-journey__progress span,.auto-journey__cta,.auto-journey__visual,.auto-journey__camry,.auto-journey__parts,.auto-journey__shipping,.auto-journey__part-card,.auto-journey__part-photo img { transition:none; } }
 
+/* ─── Video Scroll Hero ────────────────────────────────────────── */
+/* Ensure the App root never clips the sticky hero */
+#root > div { overflow-x: clip; }
+
+/* Canvas letter-boxing stays sharp at all DPRs */
+#hero canvas { image-rendering: auto; }
+
+/* Smooth scroll progress bar transition — no layout shift */
+#hero [style*="transformOrigin: left"] { will-change: width; }
+
+/* Reduced-motion: freeze on first frame, skip transitions */
+@media (prefers-reduced-motion: reduce) {
+  #hero canvas { transition: none !important; }
+  #hero .transition-all,
+  #hero .transition-opacity { transition: none !important; }
+}
+
 /* Continue the scrollytelling language through the full homepage. */
 .home-editorial { counter-reset: home-chapter; }
 .home-editorial > section:not(:first-child) { position:relative; scroll-margin-top:100px; }
