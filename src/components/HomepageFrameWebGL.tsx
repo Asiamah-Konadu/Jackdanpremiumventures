@@ -84,11 +84,12 @@ export function HomepageFrameWebGL() {
     const images = getHeroFrameImages();
     const sections = Array.from(page.querySelectorAll<HTMLElement>(':scope > section'));
     const hero = page.querySelector<HTMLElement>('#hero');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let sceneSide = -2;
     const updateProgress = () => {
       const rect = page.getBoundingClientRect();
       const range = Math.max(1, page.scrollHeight - window.innerHeight);
-      desiredFrame = THREE.MathUtils.clamp(-rect.top / range, 0, 1) * (TOTAL_FRAMES - 1);
+      desiredFrame = reducedMotion.matches ? 0 : THREE.MathUtils.clamp(-rect.top / range, 0, 1) * (TOTAL_FRAMES - 1);
 
       const center = window.innerHeight * 0.52;
       const heroRect = hero?.getBoundingClientRect();
@@ -106,8 +107,9 @@ export function HomepageFrameWebGL() {
             nearestIndex = index;
           }
         });
-        contentSide = nearestIndex % 2 === 0 ? 'left' : 'right';
-        nextSide = contentSide === 'left' ? 1 : 0;
+        const activeSection = sections[nearestIndex];
+        contentSide = activeSection?.firstElementChild?.classList.contains('home-split--right') ? 'right' : 'left';
+        nextSide = reducedMotion.matches || window.innerWidth < 761 ? -1 : contentSide === 'left' ? 1 : 0;
       }
       if (sceneSide !== nextSide) {
         sceneSide = nextSide;
@@ -145,6 +147,7 @@ export function HomepageFrameWebGL() {
 
     window.addEventListener('scroll', updateProgress, { passive: true });
     window.addEventListener('resize', resize);
+    reducedMotion.addEventListener('change', updateProgress);
     updateProgress();
     raf = requestAnimationFrame(draw);
 
@@ -153,6 +156,7 @@ export function HomepageFrameWebGL() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', updateProgress);
       window.removeEventListener('resize', resize);
+      reducedMotion.removeEventListener('change', updateProgress);
       texture.dispose();
       geometry.dispose();
       material.dispose();

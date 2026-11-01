@@ -190,6 +190,7 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
     const container = containerRef.current;
     const page = container?.closest<HTMLElement>('.home-editorial');
     if (!container || !page) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const onScroll = () => {
       const rect = page.getBoundingClientRect();
@@ -198,15 +199,19 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
       const progress = Math.min(1, Math.max(0, rawScrolled / Math.max(1, scrollHeight)));
 
       setScrollProgress(progress);
-      targetFrameRef.current = progress * (TOTAL_FRAMES - 1);
+      targetFrameRef.current = reducedMotion.matches ? 0 : progress * (TOTAL_FRAMES - 1);
 
       // Hide copy overlay when deep into the scroll
       setContentVisible(progress < 0.35);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    reducedMotion.addEventListener('change', onScroll);
     onScroll(); // init
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      reducedMotion.removeEventListener('change', onScroll);
+    };
   }, []);
 
   /* ── Resize: reallocate canvas backing store, then redraw ── */
