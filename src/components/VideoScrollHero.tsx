@@ -107,32 +107,50 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
     return () => clearInterval(t);
   }, []);
 
-  /* ── Draw single frame to canvas ── */
+  /* ── Resize canvas backing store at full DPR resolution ─────────────
+     Called ONLY from ResizeObserver + on ready — never inside drawFrame.
+     Setting canvas.width/height wipes the context state, so we must NOT
+     do this on every frame render.                                      */
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const physW = Math.round(canvas.offsetWidth  * dpr);
+    const physH = Math.round(canvas.offsetHeight * dpr);
+    // Guard: only reallocate when the physical pixel size actually changed
+    if (canvas.width === physW && canvas.height === physH) return;
+    canvas.width  = physW;
+    canvas.height = physH;
+  }, []);
+
+  /* ── Draw a single frame — pure pixel paint, zero DOM/layout changes ──
+     Draws at the full physical resolution of the backing store so the
+     image is sharp on every DPR, including 2× Retina and 3× OLED.      */
   const drawFrame = useCallback(
     (idx: number) => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas || canvas.width === 0 || canvas.height === 0) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       const img = images[idx];
       if (!img?.complete || img.naturalWidth === 0) return;
 
-      // Maintain canvas device pixel ratio for crisp rendering
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-
+      // Work in physical pixels (canvas.width/height are already scaled by DPR)
       const cw = canvas.width;
       const ch = canvas.height;
       const iw = img.naturalWidth;
       const ih = img.naturalHeight;
 
-      // Cover fit
+      // Cover fit — fills the viewport without letterboxing
       const scale = Math.max(cw / iw, ch / ih);
       const dw = iw * scale;
       const dh = ih * scale;
       const dx = (cw - dw) / 2;
       const dy = (ch - dh) / 2;
 
+      // High-quality downsampling (matters most when scale < 1)
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, dx, dy, dw, dh);
     },
     [images]
@@ -189,19 +207,23 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── Resize: redraw current frame ── */
+  /* ── Resize: reallocate canvas backing store, then redraw ── */
   useEffect(() => {
     const ro = new ResizeObserver(() => {
+      resizeCanvas();
       drawFrame(Math.round(currentFrameRef.current));
     });
     if (canvasRef.current) ro.observe(canvasRef.current);
     return () => ro.disconnect();
-  }, [drawFrame]);
+  }, [resizeCanvas, drawFrame]);
 
-  /* ── Draw frame 0 immediately once ready ── */
+  /* ── Initial resize + draw frame 0 once images are ready ── */
   useEffect(() => {
-    if (ready) drawFrame(0);
-  }, [ready, drawFrame]);
+    if (ready) {
+      resizeCanvas();
+      drawFrame(0);
+    }
+  }, [ready, resizeCanvas, drawFrame]);
 
   /* ── Audio engine ── */
   useEffect(() => {
