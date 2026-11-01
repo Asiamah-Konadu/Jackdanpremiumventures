@@ -194,6 +194,34 @@
 }
 @media(prefers-reduced-motion:reduce) { .home-editorial > section > div,.home-editorial > section:not(:first-child) img,.home-editorial > section:not(:first-child) .group:hover { transition:none; transform:none; } }
 
+/* Alternating split-scene chapters: copy and the WebGL frame trade sides. */
+@media (min-width: 761px) {
+  .home-editorial > section:not(#hero) > div {
+    width: min(58%, 820px);
+    max-width: none;
+    transition: opacity .7s ease, transform .85s cubic-bezier(.2,.7,.2,1), margin .85s cubic-bezier(.2,.7,.2,1);
+  }
+  .home-editorial > section:not(#hero):nth-of-type(odd) > div {
+    margin-left: max(4vw, calc((100vw - 1400px) / 2));
+    margin-right: auto;
+  }
+  .home-editorial > section:not(#hero):nth-of-type(even) > div {
+    margin-left: auto;
+    margin-right: max(4vw, calc((100vw - 1400px) / 2));
+  }
+  .home-editorial--ready > section:not(.home-editorial__section--visible):nth-of-type(odd) > div { opacity: 0; transform: translate(-54px, 18px); }
+  .home-editorial--ready > section:not(.home-editorial__section--visible):nth-of-type(even) > div { opacity: 0; transform: translate(54px, 18px); }
+  .home-editorial > section.home-editorial__section--visible > div { opacity: 1; transform: translate(0, 0); }
+}
+@media (max-width: 760px) {
+  .homepage-webgl { opacity: .32; }
+  .home-editorial > section:not(#hero) > div { position: relative; z-index: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-editorial > section:not(#hero) > div { transition: none !important; }
+  .homepage-webgl { animation: none !important; }
+}
+
 @theme {
   --color-dark-50: #f8fafc;
   --color-dark-100: #f1f5f9;
