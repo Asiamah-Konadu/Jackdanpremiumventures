@@ -404,7 +404,7 @@ export const VideoScrollHero: React.FC<VideoScrollHeroProps> = ({
                   <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white uppercase leading-[1.01]"
                     style={{ textShadow: '0 2px 40px rgba(8,12,20,1), 0 1px 12px rgba(8,12,20,1)' }}
                   >
-                    <span className="gold-gradient-text">AUTO IMPORT</span><br />
+                    <span className="text-white">AUTO IMPORT</span><br />
                     <span className="text-white">& EXPORT PARTNER</span>
                   </h1>
                   <p
