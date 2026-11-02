@@ -11,7 +11,8 @@ export function HomepageFrameWebGL() {
   useEffect(() => {
     const canvas = canvasRef.current;
     const page = canvas?.closest<HTMLElement>('.home-editorial');
-    if (!canvas || !page) return;
+    const scrollRoot = page?.closest<HTMLElement>('.home-site-shell') || page;
+    if (!canvas || !page || !scrollRoot) return;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -50,7 +51,8 @@ export function HomepageFrameWebGL() {
         void main(){
           float screenAspect=uViewport.x/uViewport.y;
           float imageAspect=uImage.x/uImage.y;
-          float regionWidth=mix(1.0,0.52,uLayout);
+          float splitWidth=mix(0.30,0.40,step(1100.0,uViewport.x));
+          float regionWidth=mix(1.0,splitWidth,uLayout);
           float startX=clamp(uCenter-regionWidth*0.5,0.0,1.0);
           float endX=clamp(uCenter+regionWidth*0.5,0.0,1.0);
           vec2 regionUv=vUv;
@@ -61,9 +63,7 @@ export function HomepageFrameWebGL() {
           vec2 cover=regionAspect>imageAspect?vec2(1.0,imageAspect/regionAspect):vec2(regionAspect/imageAspect,1.0);
           vec2 uv=(regionUv-0.5)*cover+0.5;
           vec3 color=texture2D(uFrame,uv).rgb;
-          float vignette=1.0-smoothstep(0.18,0.9,distance(regionUv,vec2(0.5)));
-          color*=mix(0.84,1.0,vignette);
-          gl_FragColor=vec4(color,uReady*inside*0.94);
+          gl_FragColor=vec4(color,uReady*inside*0.98);
         }
       `,
       depthTest: false,
@@ -81,17 +81,19 @@ export function HomepageFrameWebGL() {
     let currentLayout = 0;
     let desiredLayout = 0;
     let uploadedFrame = -1;
+    let previousTime = 0;
     const images = getHeroFrameImages();
     const sections = Array.from(page.querySelectorAll<HTMLElement>(':scope > section'));
     const hero = page.querySelector<HTMLElement>('#hero');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let sceneSide = -2;
     const updateProgress = () => {
-      const rect = page.getBoundingClientRect();
-      const range = Math.max(1, page.scrollHeight - window.innerHeight);
+      const rect = scrollRoot.getBoundingClientRect();
+      const range = Math.max(1, scrollRoot.scrollHeight - window.innerHeight);
       desiredFrame = reducedMotion.matches ? 0 : THREE.MathUtils.clamp(-rect.top / range, 0, 1) * (TOTAL_FRAMES - 1);
 
-      const center = window.innerHeight * 0.52;
+      const navHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--home-nav-height')) || 80;
+      const center = navHeight + (window.innerHeight - navHeight) * 0.5;
       const heroRect = hero?.getBoundingClientRect();
       let nextSide = -1;
       let contentSide: 'left' | 'right' | null = null;
@@ -108,16 +110,18 @@ export function HomepageFrameWebGL() {
           }
         });
         const activeSection = sections[nearestIndex];
-        contentSide = activeSection?.firstElementChild?.classList.contains('home-split--right') ? 'right' : 'left';
+        contentSide = activeSection?.firstElementChild?.classList.contains('home-split--right') || activeSection?.firstElementChild?.classList.contains('home-proof--right') ? 'right' : 'left';
         nextSide = reducedMotion.matches || window.innerWidth < 761 ? -1 : contentSide === 'left' ? 1 : 0;
       }
       if (sceneSide !== nextSide) {
         sceneSide = nextSide;
         desiredLayout = nextSide < 0 ? 0 : 1;
-        desiredCenter = nextSide === 0 ? 0.26 : nextSide === 1 ? 0.74 : 0.5;
+        const wideScreen = window.innerWidth >= 1100;
+        desiredCenter = nextSide === 0 ? (wideScreen ? 0.20 : 0.15) : nextSide === 1 ? (wideScreen ? 0.80 : 0.85) : 0.5;
         page.classList.toggle('scene-content-left', contentSide === 'left');
         page.classList.toggle('scene-content-right', contentSide === 'right');
       }
+      scheduleDraw();
     };
     const resize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -125,11 +129,23 @@ export function HomepageFrameWebGL() {
       updateProgress();
     };
 
-    const draw = () => {
+    const draw = (time: number) => {
+      raf = 0;
       if (!alive) return;
-      currentFrame += (desiredFrame - currentFrame) * 0.12;
-      currentCenter += (desiredCenter - currentCenter) * 0.075;
-      currentLayout += (desiredLayout - currentLayout) * 0.075;
+      const delta = previousTime ? Math.min(64, time - previousTime) : 16;
+      previousTime = time;
+      const frameEase = 1 - Math.exp(-delta / 95);
+      const layoutEase = 1 - Math.exp(-delta / 260);
+      currentFrame += (desiredFrame - currentFrame) * frameEase;
+      currentCenter += (desiredCenter - currentCenter) * layoutEase;
+      currentLayout += (desiredLayout - currentLayout) * layoutEase;
+      const frameMoving = Math.abs(desiredFrame - currentFrame) >= 0.035;
+      const layoutMoving = Math.abs(desiredCenter - currentCenter) >= 0.0005 || Math.abs(desiredLayout - currentLayout) >= 0.0005;
+      if (!frameMoving) currentFrame = desiredFrame;
+      if (!layoutMoving) {
+        currentCenter = desiredCenter;
+        currentLayout = desiredLayout;
+      }
       uniforms.uCenter.value = currentCenter;
       uniforms.uLayout.value = currentLayout;
       const frameIndex = Math.round(currentFrame);
@@ -142,14 +158,21 @@ export function HomepageFrameWebGL() {
         uploadedFrame = frameIndex;
       }
       renderer.render(scene, camera);
-      raf = requestAnimationFrame(draw);
+      if (frameMoving || layoutMoving) scheduleDraw();
     };
+    const scheduleDraw = () => {
+      if (alive && !raf) raf = requestAnimationFrame(draw);
+    };
+    const onFrameSettled = () => scheduleDraw();
+    images.forEach(image => {
+      image.addEventListener('load', onFrameSettled);
+      image.addEventListener('error', onFrameSettled);
+    });
 
     window.addEventListener('scroll', updateProgress, { passive: true });
     window.addEventListener('resize', resize);
     reducedMotion.addEventListener('change', updateProgress);
     updateProgress();
-    raf = requestAnimationFrame(draw);
 
     return () => {
       alive = false;
@@ -157,6 +180,10 @@ export function HomepageFrameWebGL() {
       window.removeEventListener('scroll', updateProgress);
       window.removeEventListener('resize', resize);
       reducedMotion.removeEventListener('change', updateProgress);
+      images.forEach(image => {
+        image.removeEventListener('load', onFrameSettled);
+        image.removeEventListener('error', onFrameSettled);
+      });
       texture.dispose();
       geometry.dispose();
       material.dispose();
@@ -168,3 +195,5 @@ export function HomepageFrameWebGL() {
 
   return <canvas ref={canvasRef} className="homepage-webgl" aria-hidden="true" />;
 }
+
+

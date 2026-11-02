@@ -138,9 +138,6 @@
 .homepage-webgl { position:fixed; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; opacity:.98; }
 .home-editorial > section:not(:first-child) { position:relative; scroll-margin-top:100px; }
 .home-editorial > section:not(:first-child)::before { counter-increment:home-chapter; content:"0" counter(home-chapter) " / JACKDAN JOURNAL"; position:absolute; top:-34px; left:0; color:#bba36c; font-size:8px; font-weight:750; letter-spacing:.2em; }
-.home-editorial--ready > section:not(.home-editorial__section--visible) > div { opacity:.28; transform:translateY(24px); }
-.home-editorial > section > div { transition:opacity .65s ease,transform .75s cubic-bezier(.2,.7,.2,1); }
-.home-editorial--ready > section.home-editorial__section--visible > div { opacity:1; transform:translateY(0); }
 .home-editorial > section:not(:first-child) h2 { font-size:clamp(28px,3.35vw,46px); line-height:1.06; letter-spacing:-.045em; }
 .home-editorial > section:not(:first-child) h2 + p,
 .home-editorial > section:not(:first-child) h2 ~ p { color:#9caaba; line-height:1.8; }

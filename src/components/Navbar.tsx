@@ -322,7 +322,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Bar - Clean & Elegant */}
-          <div className="hidden sm:flex items-center gap-2.5">
+          <div className="hidden lg:flex items-center gap-2.5">
             {/* Currency Selector Pill */}
             <div className="relative">
               <button

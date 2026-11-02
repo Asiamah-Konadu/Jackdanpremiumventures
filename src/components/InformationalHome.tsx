@@ -95,13 +95,33 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({ onNavigate
     const root = homeRef.current;
     if (!root) return;
     root.classList.add('home-editorial--ready');
-    const sections = Array.from(root.querySelectorAll<HTMLElement>(':scope > section'));
+    document.documentElement.classList.add('home-snap-enabled');
+    const shell = root.closest<HTMLElement>('.home-site-shell');
+    const siteNav = shell?.querySelector<HTMLElement>(':scope > header');
+    const syncNavHeight = () => {
+      if (!siteNav) return;
+      const navStyle = getComputedStyle(siteNav);
+      const currentPadding = Number.parseFloat(navStyle.paddingTop) + Number.parseFloat(navStyle.paddingBottom);
+      const expandedHeight = Math.ceil(siteNav.getBoundingClientRect().height + Math.max(0, 32 - currentPadding));
+      document.documentElement.style.setProperty('--home-nav-height', `${expandedHeight}px`);
+    };
+    const navObserver = siteNav ? new ResizeObserver(syncNavHeight) : null;
+    if (siteNav) navObserver?.observe(siteNav);
+    syncNavHeight();
+    const sections = Array.from(root.querySelectorAll<HTMLElement>(':scope > #hero, :scope > section.home-scene'));
+    const footer = shell?.querySelector<HTMLElement>(':scope > footer');
+    if (footer) sections.push(footer);
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let raf = 0;
+    let scrollRaf = 0;
+    let scrollBusy = false;
+    let lastWheelAt = 0;
+    let unlockTimer = 0;
 
     const updateMotion = () => {
       raf = 0;
-      const center = window.innerHeight * 0.52;
+      const navHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--home-nav-height')) || 80;
+      const center = navHeight + (window.innerHeight - navHeight) * 0.5;
       const travel = Math.min(window.innerWidth * (window.innerWidth < 761 ? 0.12 : 0.3), 360);
       sections.forEach((section, index) => {
         const content = section.firstElementChild as HTMLElement | null;
@@ -113,23 +133,84 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({ onNavigate
         }
         const rect = section.getBoundingClientRect();
         const sectionCenter = (rect.top + rect.bottom) / 2;
-        const progress = 1 - Math.min(1, Math.abs(sectionCenter - center) / (window.innerHeight * 0.9));
+        const rawProgress = 1 - Math.min(1, Math.abs(sectionCenter - center) / (window.innerHeight * 0.9));
+        const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
         const enterFrom = index % 2 === 0 ? 1 : -1;
-        content.style.opacity = String(0.52 + progress * 0.48);
+        content.style.opacity = String(0.66 + progress * 0.34);
         content.style.transform = `translate3d(${enterFrom * (1 - progress) * travel}px, ${(1 - progress) * 12}px, 0)`;
       });
     };
     const schedule = () => { if (!raf) raf = requestAnimationFrame(updateMotion); };
+    const releaseAfterWheelQuiet = () => {
+      window.clearTimeout(unlockTimer);
+      const quietFor = performance.now() - lastWheelAt;
+      if (quietFor < 220) {
+        unlockTimer = window.setTimeout(releaseAfterWheelQuiet, 220 - quietFor);
+      } else {
+        scrollBusy = false;
+      }
+    };
+    const animateToSection = (targetY: number) => {
+      const fromY = window.scrollY;
+      const duration = reducedMotion.matches ? 0 : 780;
+      const startedAt = performance.now();
+      document.documentElement.classList.add('home-snap-animating');
+      const step = (time: number) => {
+        const progress = duration === 0 ? 1 : Math.min(1, (time - startedAt) / duration);
+        const eased = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        window.scrollTo(0, fromY + (targetY - fromY) * eased);
+        if (progress < 1) {
+          scrollRaf = requestAnimationFrame(step);
+        } else {
+          window.scrollTo(0, targetY);
+          scrollRaf = 0;
+          document.documentElement.classList.remove('home-snap-animating');
+          releaseAfterWheelQuiet();
+        }
+      };
+      scrollRaf = requestAnimationFrame(step);
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || Math.abs(event.deltaY) < 8 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (root.querySelector('.home-modal')) return;
+      event.preventDefault();
+      lastWheelAt = performance.now();
+      if (scrollBusy) {
+        releaseAfterWheelQuiet();
+        return;
+      }
+      const navHeight = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--home-nav-height')) || 80;
+      const points = sections.map(section => section.getBoundingClientRect().top + window.scrollY - navHeight);
+      if (!points.length) return;
+      const currentY = window.scrollY;
+      const threshold = 24;
+      const targetY = event.deltaY > 0
+        ? (points.find(point => point > currentY + threshold) ?? points[points.length - 1])
+        : ([...points].reverse().find(point => point < currentY - threshold) ?? points[0]);
+      if (Math.abs(targetY - currentY) < threshold) return;
+      scrollBusy = true;
+      animateToSection(targetY);
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
     reducedMotion.addEventListener('change', schedule);
     updateMotion();
     return () => {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(scrollRaf);
+      window.clearTimeout(unlockTimer);
+      document.documentElement.classList.remove('home-snap-animating');
+      window.removeEventListener('wheel', onWheel);
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
       reducedMotion.removeEventListener('change', schedule);
+      navObserver?.disconnect();
+      document.documentElement.style.removeProperty('--home-nav-height');
       root.classList.remove('home-editorial--ready');
+      document.documentElement.classList.remove('home-snap-enabled');
     };
   }, []);
 
@@ -149,7 +230,7 @@ export const InformationalHome: React.FC<InformationalHomeProps> = ({ onNavigate
       <VideoScrollHero onNavigatePage={onNavigatePage} onOpenFlyerModal={() => setActiveFlyer(flyers[0])} />
 
       <section className="home-scene home-scene--proof" aria-label="Jackdan service standards">
-        <div className="home-shell home-proof">
+        <div className="home-shell home-proof home-proof--right">
           <div className="home-proof__intro">
             <span className="home-eyebrow"><Sparkles size={13} /> THE JACKDAN STANDARD</span>
             <p>One trusted team from overseas sourcing to your driveway.</p>
